@@ -17,45 +17,71 @@ function calculate() {
     parseFloat(document.getElementById("h240").value),
   ];
 
-  const directions = [0, 120, 240].map((d) => (Math.PI / 180) * d);
+  const angles = [0, 120, 240].map(d => d * Math.PI / 180);
 
-  // Calculate resultant magnitudes for each trial
-  function mag(arr) {
-    return Math.sqrt(arr[0] ** 2 + arr[1] ** 2 + arr[2] ** 2);
+  // Magnitude of each trial vibration
+  const mags = [v0, v120, v240].map(v => Math.sqrt(v[0]**2 + v[1]**2 + v[2]**2));
+
+  // Vector sum
+  let sumX = 0, sumY = 0;
+  for(let i=0; i<3; i++){
+    sumX += mags[i]*Math.cos(angles[i]);
+    sumY += mags[i]*Math.sin(angles[i]);
   }
 
-  const mags = [mag(v0), mag(v120), mag(v240)];
-
-  // Complex vector sum
-  let sumX = 0,
-    sumY = 0;
-  for (let i = 0; i < 3; i++) {
-    sumX += mags[i] * Math.cos(directions[i]);
-    sumY += mags[i] * Math.sin(directions[i]);
-  }
-
-  const resultantMag = Math.sqrt(sumX ** 2 + sumY ** 2);
+  const resultantMag = Math.sqrt(sumX**2 + sumY**2);
   const resultantAngle = Math.atan2(sumY, sumX);
+  const avgMag = (mags[0]+mags[1]+mags[2])/3;
+  const corrMass = (m*resultantMag)/avgMag;
+  const corrAngle = ((resultantAngle*180/Math.PI)+180)%360;
 
-  const avgMag = (mags[0] + mags[1] + mags[2]) / 3;
-  const corrMass = (m * resultantMag) / avgMag;
-  const corrAngle = ((resultantAngle * 180) / Math.PI + 180) % 360;
-
-  // Estimate residual vibration (simple scaled reduction)
-  const residual = [v0, v120, v240].map((v) => [
-    (v[0] / 10).toFixed(3),
-    (v[1] / 10).toFixed(3),
-    (v[2] / 10).toFixed(3),
-  ]);
-
-  const output = `
+  // Display results
+  document.getElementById("output").innerHTML = `
     <h2>Results</h2>
     <p><b>Correction Mass:</b> ${corrMass.toFixed(4)} kg</p>
     <p><b>Placement Angle:</b> ${corrAngle.toFixed(2)}°</p>
-    <h3>Expected Residual Vibration:</h3>
-    <p>Radial: ${residual[0][0]} mm/s</p>
-    <p>Axial: ${residual[0][1]} mm/s</p>
-    <p>Horizontal: ${residual[0][2]} mm/s</p>
   `;
-  document.getElementById("output").innerHTML = output;
+
+  // Draw vector diagram
+  const canvas = document.getElementById("vectorCanvas");
+  const ctx = canvas.getContext("2d");
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  const centerX = canvas.width/2;
+  const centerY = canvas.height/2;
+
+  function drawVector(mag, angle, color){
+    ctx.beginPath();
+    ctx.moveTo(centerX, centerY);
+    ctx.lineTo(centerX + mag*20*Math.cos(angle), centerY - mag*20*Math.sin(angle));
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 3;
+    ctx.stroke();
+  }
+
+  // Draw trial vectors (blue)
+  for(let i=0;i<3;i++) drawVector(mags[i], angles[i], 'blue');
+  // Resultant vector (red)
+  drawVector(resultantMag, resultantAngle, 'red');
+  // Correction vector (green)
+  drawVector(corrMass, corrAngle*Math.PI/180, 'green');
+
+  // Residual vibration chart
+  const ctxChart = document.getElementById("vibrationChart").getContext("2d");
+  if(window.myChart) window.myChart.destroy();
+  window.myChart = new Chart(ctxChart, {
+    type: 'bar',
+    data: {
+      labels: ['Radial','Axial','Horizontal'],
+      datasets:[{
+        label:'Expected Residual Vibration',
+        data:[v0[0]/10,v0[1]/10,v0[2]/10],
+        backgroundColor:['#0078d7','#ff9900','#28a745']
+      }]
+    },
+    options: {
+      responsive:true,
+      plugins:{legend:{display:false}},
+      scales:{y:{beginAtZero:true}}
+    }
+  });
 }
