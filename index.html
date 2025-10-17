@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>3-Trial-Mass Rotor Balancer – Precise Correction & Vibration Control</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>🌀 3-Trial-Mass Rotor Balancing Calculator</h1>
+
+    <div class="input-section">
+      <label>Trial Mass (kg):</label>
+      <input type="number" id="trialMass" step="0.001" placeholder="e.g. 0.75" />
+
+      <h3>Vibrations at 0°</h3>
+      <input type="number" id="r0" placeholder="Radial" />
+      <input type="number" id="a0" placeholder="Axial" />
+      <input type="number" id="h0" placeholder="Horizontal" />
+
+      <h3>Vibrations at 120°</h3>
+      <input type="number" id="r120" placeholder="Radial" />
+      <input type="number" id="a120" placeholder="Axial" />
+      <input type="number" id="h120" placeholder="Horizontal" />
+
+      <h3>Vibrations at 240°</h3>
+      <input type="number" id="r240" placeholder="Radial" />
+      <input type="number" id="a240" placeholder="Axial" />
+      <input type="number" id="h240" placeholder="Horizontal" />
+
+      <button onclick="calculate()">Calculate</button>
+    </div>
+
+    <div class="output-section" id="output"></div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
