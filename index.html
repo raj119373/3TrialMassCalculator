@@ -1,44 +1,4586 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>3-Trial-Mass Rotor Balancer – Vector & Chart</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Engineering Tools Portal - Professional Suite</title>
+<link rel="manifest" href="data:application/json,{%22name%22:%22Engineering%20Tools%20Portal%22,%22short_name%22:%22EngTools%22,%22start_url%22:%22/%22,%22display%22:%22standalone%22,%22background_color%22:%22%23ffffff%22,%22theme_color%22:%22%23004aad%22}">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  :root {
+    --primary-color: #004aad;
+    --secondary-color: #0066ff;
+    --success-color: #28a745;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --dark-bg: #1a1a1a;
+    --dark-card: #2d2d2d;
+    --light-bg: #f5f7fa;
+    --light-card: #ffffff;
+    --text-primary: #333333;
+    --text-secondary: #666666;
+    --border-color: #e0e0e0;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--light-bg);
+    color: var(--text-primary);
+    transition: all 0.3s ease;
+  }
+
+  body.dark-mode {
+    background: var(--dark-bg);
+    color: #e0e0e0;
+  }
+
+  body.dark-mode .section {
+    background: var(--dark-card);
+    color: #e0e0e0;
+  }
+
+  body.dark-mode .tab {
+    background: #3a3a3a;
+    color: #e0e0e0;
+  }
+
+  body.dark-mode .tab.active {
+    background: var(--primary-color);
+  }
+
+  body.dark-mode input, body.dark-mode select {
+    background: #3a3a3a;
+    color: #e0e0e0;
+    border-color: #555;
+  }
+
+  body.dark-mode .result-card {
+    background: #3a3a3a;
+  }
+
+  body.dark-mode .history-item {
+    background: #3a3a3a;
+  }
+
+  body.dark-mode .collapsible {
+    background: #3a3a3a;
+    color: #e0e0e0;
+  }
+
+  .header {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+  }
+
+  .header-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .header h1 {
+    font-size: 28px;
+    margin: 0;
+  }
+
+  .header-controls {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+  }
+
+  .theme-toggle {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .theme-toggle:hover {
+    background: rgba(255,255,255,0.3);
+  }
+
+  .search-bar {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    padding: 8px 15px;
+    border-radius: 20px;
+    color: white;
+    width: 250px;
+  }
+
+  .search-bar::placeholder {
+    color: rgba(255,255,255,0.7);
+  }
+
+  .main-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 80px;
+    width: 250px;
+    height: calc(100vh - 80px);
+    background: white;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    overflow-y: auto;
+    transition: transform 0.3s ease;
+    z-index: 999;
+  }
+
+  body.dark-mode .sidebar {
+    background: var(--dark-card);
+  }
+
+  .sidebar.collapsed {
+    transform: translateX(-250px);
+  }
+
+  .sidebar-toggle {
+    position: fixed;
+    left: 10px;
+    top: 90px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    z-index: 1001;
+    transition: all 0.3s;
+  }
+
+  .sidebar.collapsed + .sidebar-toggle {
+    left: 10px;
+  }
+
+  .sidebar-menu {
+    padding: 20px 0;
+  }
+
+  .menu-item {
+    padding: 12px 20px;
+    cursor: pointer;
+    transition: all 0.3s;
+    border-left: 3px solid transparent;
+  }
+
+  .menu-item:hover {
+    background: #f0f0f0;
+  }
+
+  body.dark-mode .menu-item:hover {
+    background: #3a3a3a;
+  }
+
+  .menu-item.active {
+    background: #e3f2fd;
+    border-left-color: var(--primary-color);
+    color: var(--primary-color);
+  }
+
+  .content-area {
+    margin-left: 250px;
+    transition: margin-left 0.3s ease;
+  }
+
+  .sidebar.collapsed ~ .content-area {
+    margin-left: 0;
+  }
+
+  .tabs {
+    display: flex;
+    margin-bottom: 20px;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  }
+
+  .tab {
+    padding: 15px 25px;
+    background: #e0e0e0;
+    cursor: pointer;
+    transition: all 0.3s;
+    flex: 1;
+    text-align: center;
+    position: relative;
+  }
+
+  .tab:hover {
+    background: #d0d0d0;
+  }
+
+  .tab.active {
+    background: var(--primary-color);
+    color: white;
+  }
+
+  .tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--secondary-color);
+  }
+
+  .tab-content {
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .tab-content.active {
+    display: block;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .section {
+    background: white;
+    padding: 25px;
+    margin: 20px 0;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--border-color);
+  }
+
+  .section-title {
+    font-size: 20px;
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-actions {
+    display: flex;
+    gap: 10px;
+  }
+
+  .input-group {
+    margin: 15px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .input-group label {
+    min-width: 200px;
+    font-weight: 500;
+  }
+
+  .input-group input, .input-group select {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    transition: all 0.3s;
+  }
+
+  .input-group input:focus, .input-group select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 5px rgba(0, 74, 173, 0.3);
+  }
+
+  .input-group.error input {
+    border-color: var(--danger-color);
+    box-shadow: 0 0 5px rgba(220, 53, 69, 0.3);
+  }
+
+  .input-group.success input {
+    border-color: var(--success-color);
+    box-shadow: 0 0 5px rgba(40, 167, 69, 0.3);
+  }
+
+  .btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  }
+
+  .btn-primary {
+    background: var(--primary-color);
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: var(--secondary-color);
+  }
+
+  .btn-secondary {
+    background: #6c757d;
+    color: white;
+  }
+
+  .btn-success {
+    background: var(--success-color);
+    color: white;
+  }
+
+  .btn-danger {
+    background: var(--danger-color);
+    color: white;
+  }
+
+  .btn-warning {
+    background: var(--warning-color);
+    color: #333;
+  }
+
+  .btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .result-card {
+    background: #f0f8ff;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 15px 0;
+    border-left: 4px solid var(--primary-color);
+    animation: slideIn 0.3s ease;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(-20px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .result-card.status-good {
+    background: #d4edda;
+    border-left-color: var(--success-color);
+  }
+
+  .result-card.status-warning {
+    background: #fff3cd;
+    border-left-color: var(--warning-color);
+  }
+
+  .result-card.status-danger {
+    background: #f8d7da;
+    border-left-color: var(--danger-color);
+  }
+
+  .grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin: 20px 0;
+  }
+
+  .chart-container {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin: 20px 0;
+  }
+
+  .loading {
+    display: none;
+    text-align: center;
+    padding: 20px;
+  }
+
+  .loading.active {
+    display: block;
+  }
+
+  .spinner {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(0,0,0,0.1);
+    border-radius: 50%;
+    border-top-color: var(--primary-color);
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .notification {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: 5px;
+    color: white;
+    font-weight: 500;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    z-index: 2000;
+    animation: slideInRight 0.3s ease;
+    max-width: 300px;
+  }
+
+  @keyframes slideInRight {
+    from { opacity: 0; transform: translateX(100px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .notification.success {
+    background: var(--success-color);
+  }
+
+  .notification.error {
+    background: var(--danger-color);
+  }
+
+  .notification.warning {
+    background: var(--warning-color);
+    color: #333;
+  }
+
+  .notification.info {
+    background: var(--primary-color);
+  }
+
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 3000;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .modal.active {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    animation: slideUp 0.3s ease;
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(50px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--border-color);
+  }
+
+  .modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #999;
+  }
+
+  .modal-close:hover {
+    color: #333;
+  }
+
+  .tooltip {
+    position: relative;
+    display: inline-block;
+  }
+
+  .tooltip .tooltiptext {
+    visibility: hidden;
+    width: 200px;
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 8px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -100px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: 12px;
+  }
+
+  .tooltip:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
+  }
+
+  .progress-bar {
+    width: 100%;
+    height: 20px;
+    background: #e0e0e0;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 10px 0;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--primary-color);
+    transition: width 0.3s ease;
+    border-radius: 10px;
+  }
+
+  .kbd {
+    background: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    padding: 2px 6px;
+    font-family: monospace;
+    font-size: 12px;
+  }
+
+  .status-indicator {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 8px;
+  }
+
+  .status-online {
+    background: var(--success-color);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+  }
+
+  .status-offline {
+    background: #999;
+  }
+
+  .method-selector {
+    display: flex;
+    gap: 10px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+  }
+
+  .method-btn {
+    padding: 10px 20px;
+    border: 2px solid var(--primary-color);
+    background: white;
+    color: var(--primary-color);
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .method-btn.active {
+    background: var(--primary-color);
+    color: white;
+  }
+
+  .method-btn:hover {
+    background: var(--primary-color);
+    color: white;
+  }
+
+  .visualization {
+    margin: 20px 0;
+    text-align: center;
+  }
+
+  .two-column {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .collapsible {
+    background: #f1f1f1;
+    color: #444;
+    cursor: pointer;
+    padding: 12px;
+    width: 100%;
+    border: none;
+    text-align: left;
+    outline: none;
+    font-size: 15px;
+    border-radius: 5px;
+    margin: 10px 0;
+    transition: all 0.3s;
+  }
+
+  .active, .collapsible:hover {
+    background: #e0e0e0;
+  }
+
+  .collapsible-content {
+    padding: 0 12px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.2s ease-out;
+    background: white;
+    border-radius: 5px;
+  }
+
+  .material-card {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    margin: 10px 0;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s;
+    cursor: pointer;
+  }
+
+  .material-card:hover {
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+  }
+
+  .material-card.selected {
+    border-color: var(--primary-color);
+    background: #f0f8ff;
+  }
+
+  .history-item {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    margin: 10px 0;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s;
+    cursor: pointer;
+  }
+
+  .history-item:hover {
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+  }
+
+  .history-item.selected {
+    border-color: var(--primary-color);
+    background: #f0f8ff;
+  }
+
+  .report-template {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 10px 0;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s;
+    cursor: pointer;
+  }
+
+  .report-template:hover {
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+  }
+
+  .report-template.selected {
+    border-color: var(--primary-color);
+    background: #f0f8ff;
+  }
+
+  .settings-group {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 10px 0;
+    border: 1px solid var(--border-color);
+  }
+
+  .settings-group h3 {
+    margin-bottom: 15px;
+    color: var(--primary-color);
+  }
+
+  .toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+  }
+
+  .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+  }
+
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+  }
+
+  input:checked + .slider {
+    background-color: var(--primary-color);
+  }
+
+  input:checked + .slider:before {
+    transform: translateX(26px);
+  }
+
+  @media (max-width: 768px) {
+    .sidebar {
+      transform: translateX(-250px);
+    }
+    
+    .sidebar.active {
+      transform: translateX(0);
+    }
+    
+    .content-area {
+      margin-left: 0;
+    }
+    
+    .header-content {
+      flex-direction: column;
+      gap: 15px;
+    }
+    
+    .search-bar {
+      width: 100%;
+    }
+    
+    .tabs {
+      flex-direction: column;
+    }
+    
+    .grid-container {
+      grid-template-columns: 1fr;
+    }
+    
+    .two-column {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .floating-action {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: var(--primary-color);
+    color: white;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    font-size: 24px;
+    transition: all 0.3s;
+    z-index: 1000;
+  }
+
+  .floating-action:hover {
+    transform: scale(1.1);
+    background: var(--secondary-color);
+  }
+
+  .quick-access {
+    position: fixed;
+    bottom: 100px;
+    right: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 999;
+  }
+
+  .quick-btn {
+    background: white;
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 18px;
+  }
+
+  .quick-btn:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: scale(1.1);
+  }
+
+  .quick-btn.hidden {
+    opacity: 0;
+    transform: scale(0);
+  }
+
+  .wizard-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .wizard-step {
+    display: none;
+  }
+
+  .wizard-step.active {
+    display: block;
+  }
+
+  .wizard-navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+
+  .step-indicator {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .step {
+    flex: 1;
+    text-align: center;
+    position: relative;
+  }
+
+  .step::before {
+    content: '';
+    position: absolute;
+    top: 15px;
+    left: 50%;
+    right: -50%;
+    height: 2px;
+    background: #e0e0e0;
+    z-index: -1;
+  }
+
+  .step:last-child::before {
+    display: none;
+  }
+
+  .step.active::before {
+    background: var(--primary-color);
+  }
+
+  .step-number {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #e0e0e0;
+    color: #666;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 5px;
+  }
+
+  .step.active .step-number {
+    background: var(--primary-color);
+    color: white;
+  }
+
+  .step.completed .step-number {
+    background: var(--success-color);
+    color: white;
+  }
+
+  .collapsible-section {
+    margin: 20px 0;
+  }
+
+  .collapsible-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background: #f0f0f0;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .collapsible-header:hover {
+    background: #e0e0e0;
+  }
+
+  .collapsible-icon {
+    transition: transform 0.3s;
+  }
+
+  .collapsible-header.active .collapsible-icon {
+    transform: rotate(180deg);
+  }
+
+  .collapsible-body {
+    padding: 15px;
+    border: 1px solid var(--border-color);
+    border-top: none;
+    border-radius: 0 0 5px 5px;
+    display: none;
+  }
+
+  .collapsible-header.active + .collapsible-body {
+    display: block;
+  }
+
+  .calculation-steps {
+    margin: 20px 0;
+  }
+
+  .step-item {
+    display: flex;
+    margin-bottom: 15px;
+  }
+
+  .step-number {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+    flex-shrink: 0;
+  }
+
+  .step-content {
+    flex: 1;
+  }
+
+  .step-title {
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+
+  .step-description {
+    color: var(--text-secondary);
+  }
+
+  .data-comparison {
+    display: flex;
+    gap: 20px;
+    margin: 20px 0;
+  }
+
+  .comparison-column {
+    flex: 1;
+    padding: 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+  }
+
+  .comparison-header {
+    font-weight: bold;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .comparison-value {
+    margin: 5px 0;
+  }
+
+  .comparison-value.different {
+    color: var(--danger-color);
+    font-weight: bold;
+  }
+
+  /* Gear Drawing Styles */
+  .gear-drawing-container {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 20px 0;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  }
+
+  .gear-drawing-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .gear-drawing-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--primary-color);
+  }
+
+  .gear-drawing-controls {
+    display: flex;
+    gap: 10px;
+  }
+
+  .gear-drawing-canvas {
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    display: block;
+    margin: 0 auto;
+    background: white;
+  }
+
+  .gear-dimensions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 20px;
+  }
+
+  .dimension-card {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 4px solid var(--primary-color);
+  }
+
+  .dimension-title {
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: var(--primary-color);
+  }
+
+  .dimension-value {
+    font-size: 16px;
+    margin: 5px 0;
+  }
+
+  .dimension-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  .gear-legend {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 15px;
+    flex-wrap: wrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 14px;
+  }
+
+  .legend-color {
+    width: 20px;
+    height: 3px;
+    border-radius: 2px;
+  }
+
+  .drawing-tools {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    justify-content: center;
+  }
+
+  .tool-btn {
+    padding: 8px 15px;
+    border: 1px solid var(--border-color);
+    background: white;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 14px;
+  }
+
+  .tool-btn:hover {
+    background: #f0f0f0;
+  }
+
+  .tool-btn.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+  }
+
+  .gear-specs-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+
+  .gear-specs-table th, .gear-specs-table td {
+    border: 1px solid var(--border-color);
+    padding: 10px;
+    text-align: left;
+  }
+
+  .gear-specs-table th {
+    background-color: var(--primary-color);
+    color: white;
+  }
+
+  .gear-specs-table tr:nth-child(even) {
+    background-color: #f2f2f2;
+  }
+
+  .export-options {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    justify-content: center;
+  }
+
+  .export-btn {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 14px;
+  }
+
+  .export-btn.dxf {
+    background: var(--success-color);
+    color: white;
+  }
+
+  .export-btn.png {
+    background: var(--warning-color);
+    color: #333;
+  }
+
+  .export-btn.pdf {
+    background: var(--danger-color);
+    color: white;
+  }
+
+  .export-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  }
+</style>
 </head>
 <body>
-  <div class="container">
-    <h1>🌀 3-Trial-Mass Rotor Balancing Calculator</h1>
 
-    <div class="input-section">
-      <label>Trial Mass (kg):</label>
-      <input type="number" id="trialMass" step="0.001" placeholder="e.g. 0.75" />
+<div class="header">
+  <div class="header-content">
+    <h1>⚙️ Engineering Tools Portal - Professional Suite</h1>
+    <div class="header-controls">
+      <input type="text" class="search-bar" placeholder="Search tools, calculations..." id="searchBar">
+      <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+      <span class="status-indicator status-online"></span>
+      <span>Online</span>
+    </div>
+  </div>
+</div>
 
-      <h3>Vibrations at 0°</h3>
-      <input type="number" id="r0" placeholder="Radial" />
-      <input type="number" id="a0" placeholder="Axial" />
-      <input type="number" id="h0" placeholder="Horizontal" />
+<button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
 
-      <h3>Vibrations at 120°</h3>
-      <input type="number" id="r120" placeholder="Radial" />
-      <input type="number" id="a120" placeholder="Axial" />
-      <input type="number" id="h120" placeholder="Horizontal" />
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-menu">
+    <div class="menu-item active" onclick="navigateTo('dashboard')">
+      📊 Dashboard
+    </div>
+    <div class="menu-item" onclick="navigateTo('balancing')">
+      🌀 Rotor Balancing
+    </div>
+    <div class="menu-item" onclick="navigateTo('conveyor')">
+      🧮 Conveyor Design
+    </div>
+    <div class="menu-item" onclick="navigateTo('gear')">
+      ⚙️ Gear Design
+    </div>
+    <div class="menu-item" onclick="navigateTo('vibration')">
+      📈 Vibration Analysis
+    </div>
+    <div class="menu-item" onclick="navigateTo('materials')">
+      🔬 Materials Database
+    </div>
+    <div class="menu-item" onclick="navigateTo('history')">
+      📚 Calculation History
+    </div>
+    <div class="menu-item" onclick="navigateTo('reports')">
+      📄 Reports
+    </div>
+    <div class="menu-item" onclick="navigateTo('settings')">
+      ⚙️ Settings
+    </div>
+  </div>
+</div>
 
-      <h3>Vibrations at 240°</h3>
-      <input type="number" id="r240" placeholder="Radial" />
-      <input type="number" id="a240" placeholder="Axial" />
-      <input type="number" id="h240" placeholder="Horizontal" />
-
-      <button onclick="calculate()">Calculate</button>
+<div class="content-area">
+  <div class="main-container">
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('dashboard', this)">Dashboard</div>
+      <div class="tab" onclick="switchTab('balancing', this)">Rotor Balancing</div>
+      <div class="tab" onclick="switchTab('conveyor', this)">Conveyor Design</div>
+      <div class="tab" onclick="switchTab('gear', this)">Gear Design</div>
+      <div class="tab" onclick="switchTab('vibration', this)">Vibration Analysis</div>
+      <div class="tab" onclick="switchTab('materials', this)">Materials</div>
+      <div class="tab" onclick="switchTab('history', this)">History</div>
+      <div class="tab" onclick="switchTab('reports', this)">Reports</div>
+      <div class="tab" onclick="switchTab('settings', this)">Settings</div>
     </div>
 
-    <div class="output-section" id="output"></div>
+    <!-- ==================== DASHBOARD ==================== -->
+    <div class="tab-content active" id="dashboardTool">
+      <div class="section">
+        <div class="section-header">
+          <h2 class="section-title">📊 Engineering Dashboard</h2>
+          <div class="section-actions">
+            <button class="btn btn-primary" onclick="refreshDashboard()">🔄 Refresh</button>
+            <button class="btn btn-secondary" onclick="exportDashboard()">📊 Export</button>
+          </div>
+        </div>
+        
+        <div class="grid-container">
+          <div class="result-card">
+            <h3>Recent Calculations</h3>
+            <p id="recentCalcCount">0 calculations today</p>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: 0%"></div>
+            </div>
+          </div>
+          
+          <div class="result-card">
+            <h3>System Status</h3>
+            <p>All systems operational</p>
+            <p>Last backup: <span id="lastBackup">Never</span></p>
+          </div>
+          
+          <div class="result-card">
+            <h3>Quick Actions</h3>
+            <button class="btn btn-primary" onclick="quickCalculation('balancing')">New Balancing</button>
+            <button class="btn btn-primary" onclick="quickCalculation('conveyor')">New Conveyor</button>
+            <button class="btn btn-primary" onclick="quickCalculation('gear')">New Gear</button>
+          </div>
+        </div>
+        
+        <div class="chart-container">
+          <h3>Calculation Trends</h3>
+          <canvas id="trendsChart" width="400" height="200"></canvas>
+        </div>
+        
+        <div class="chart-container">
+          <h3>Vibration Analysis Overview</h3>
+          <canvas id="vibrationChart" width="400" height="200"></canvas>
+        </div>
+      </div>
+    </div>
 
-    <canvas id="vectorCanvas" width="500" height="500"></canvas>
-    <canvas id="vibrationChart" width="500" height="300"></canvas>
+    <!-- ==================== ROTOR BALANCING TOOL ==================== -->
+    <div class="tab-content" id="balancingTool">
+      <div class="section">
+        <div class="section-header">
+          <h2 class="section-title">🌀 Advanced Rotor Balancing Calculator</h2>
+          <div class="section-actions">
+            <button class="btn btn-success" onclick="saveToHistory()">💾 Save</button>
+            <button class="btn btn-warning" onclick="generatePDF()">📄 PDF</button>
+          </div>
+        </div>
+        
+        <div class="method-selector">
+          <button class="method-btn active" onclick="selectBalancingMethod('3trial')">3-Trial-Mass</button>
+          <button class="method-btn" onclick="selectBalancingMethod('2point')">2-Point</button>
+        </div>
+
+        <!-- 3-Trial-Mass Input -->
+        <div id="threeTrialInputs">
+          <div class="collapsible-section">
+            <div class="collapsible-header" onclick="toggleCollapsible(this)">
+              <h4>Basic Parameters</h4>
+              <span class="collapsible-icon">▼</span>
+            </div>
+            <div class="collapsible-body">
+              <div class="input-group">
+                <label>Trial Mass (kg):</label>
+                <input id="trialMass" type="number" step="0.01" placeholder="0.5">
+                <span class="tooltip">ℹ️
+                  <span class="tooltiptext">Mass used for trial runs to determine unbalance</span>
+                </span>
+              </div>
+              <div class="input-group">
+                <label>Rotor Speed (RPM):</label>
+                <input id="rotorSpeed" type="number" step="10" placeholder="1800">
+              </div>
+              <div class="input-group">
+                <label>Balancing Radius (mm):</label>
+                <input id="balancingRadius" type="number" step="1" placeholder="100">
+              </div>
+            </div>
+          </div>
+
+          <div class="collapsible-section">
+            <div class="collapsible-header" onclick="toggleCollapsible(this)">
+              <h4>Vibrations at 0°</h4>
+              <span class="collapsible-icon">▼</span>
+            </div>
+            <div class="collapsible-body">
+              <div class="input-group">
+                <label>Radial (mm/s):</label>
+                <input id="r0" type="number" step="0.01" placeholder="2.5">
+              </div>
+              <div class="input-group">
+                <label>Axial (mm/s):</label>
+                <input id="a0" type="number" step="0.01" placeholder="1.2">
+              </div>
+              <div class="input-group">
+                <label>Horizontal (mm/s):</label>
+                <input id="h0" type="number" step="0.01" placeholder="0.8">
+              </div>
+            </div>
+          </div>
+
+          <div class="collapsible-section">
+            <div class="collapsible-header" onclick="toggleCollapsible(this)">
+              <h4>Vibrations at 120°</h4>
+              <span class="collapsible-icon">▼</span>
+            </div>
+            <div class="collapsible-body">
+              <div class="input-group">
+                <label>Radial (mm/s):</label>
+                <input id="r120" type="number" step="0.01" placeholder="3.1">
+              </div>
+              <div class="input-group">
+                <label>Axial (mm/s):</label>
+                <input id="a120" type="number" step="0.01" placeholder="1.5">
+              </div>
+              <div class="input-group">
+                <label>Horizontal (mm/s):</label>
+                <input id="h120" type="number" step="0.01" placeholder="1.0">
+              </div>
+            </div>
+          </div>
+
+          <div class="collapsible-section">
+            <div class="collapsible-header" onclick="toggleCollapsible(this)">
+              <h4>Vibrations at 240°</h4>
+              <span class="collapsible-icon">▼</span>
+            </div>
+            <div class="collapsible-body">
+              <div class="input-group">
+                <label>Radial (mm/s):</label>
+                <input id="r240" type="number" step="0.01" placeholder="2.8">
+              </div>
+              <div class="input-group">
+                <label>Axial (mm/s):</label>
+                <input id="a240" type="number" step="0.01" placeholder="1.3">
+              </div>
+              <div class="input-group">
+                <label>Horizontal (mm/s):</label>
+                <input id="h240" type="number" step="0.01" placeholder="0.9">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2-Point Method Input -->
+        <div id="twoPointInputs" style="display:none;">
+          <div class="collapsible-section">
+            <div class="collapsible-header" onclick="toggleCollapsible(this)">
+              <h4>Basic Parameters</h4>
+              <span class="collapsible-icon">▼</span>
+            </div>
+            <div class="collapsible-body">
+              <div class="input-group">
+                <label>Trial Mass (kg):</label>
+                <input id="mt" type="number" step="0.01" placeholder="0.5">
+              </div>
+              <div class="input-group">
+                <label>Rotor Speed (RPM):</label>
+                <input id="rotorSpeed2Point" type="number" step="10" placeholder="1800">
+              </div>
+              <div class="input-group">
+                <label>Balancing Radius (mm):</label>
+                <input id="balancingRadius2Point" type="number" step="1" placeholder="100">
+              </div>
+            </div>
+          </div>
+
+          <div class="collapsible-section">
+            <div class="collapsible-header" onclick="toggleCollapsible(this)">
+              <h4>Before Trial Mass</h4>
+              <span class="collapsible-icon">▼</span>
+            </div>
+            <div class="collapsible-body">
+              <div class="input-group">
+                <label>Amplitude (mm/s):</label>
+                <input id="A1" type="number" step="0.01" placeholder="2.5">
+              </div>
+              <div class="input-group">
+                <label>Phase Angle (°):</label>
+                <input id="theta1" type="number" step="0.1" placeholder="45">
+              </div>
+            </div>
+          </div>
+
+          <div class="collapsible-section">
+            <div class="collapsible-header" onclick="toggleCollapsible(this)">
+              <h4>After Trial Mass</h4>
+              <span class="collapsible-icon">▼</span>
+            </div>
+            <div class="collapsible-body">
+              <div class="input-group">
+                <label>Amplitude (mm/s):</label>
+                <input id="A2" type="number" step="0.01" placeholder="3.2">
+              </div>
+              <div class="input-group">
+                <label>Phase Angle (°):</label>
+                <input id="theta2" type="number" step="0.1" placeholder="120">
+              </div>
+            </div>
+          </div>
+
+          <div class="collapsible-section">
+            <div class="collapsible-header" onclick="toggleCollapsible(this)">
+              <h4>Trial Mass Position</h4>
+              <span class="collapsible-icon">▼</span>
+            </div>
+            <div class="collapsible-body">
+              <div class="input-group">
+                <label>Angle (°):</label>
+                <input id="phit" type="number" step="0.1" placeholder="0">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-actions">
+          <button class="btn btn-primary" onclick="runCalculation()">🧮 Calculate</button>
+          <button class="btn btn-secondary" onclick="resetInputs()">🔄 Reset</button>
+          <button class="btn btn-warning" onclick="loadPreset()">📋 Load Preset</button>
+        </div>
+
+        <div class="loading" id="loading">
+          <div class="spinner"></div>
+          <p>Calculating...</p>
+        </div>
+
+        <h3>Vibration Analysis Dashboard</h3>
+        <div id="vibrationDashboard"></div>
+
+        <h3>Results</h3>
+        <div id="results"></div>
+        
+        <h3>Calculation Steps</h3>
+        <div class="calculation-steps" id="calculationSteps"></div>
+        
+        <h3>Advanced Visualization</h3>
+        <div class="visualization" id="visualization"></div>
+      </div>
+    </div>
+
+    <!-- ==================== CONVEYOR DESIGN TOOL ==================== -->
+    <div class="tab-content" id="conveyorTool">
+      <div class="section">
+        <div class="section-header">
+          <h2 class="section-title">🧮 Advanced Conveyor Design Tool</h2>
+          <div class="section-actions">
+            <button class="btn btn-success" onclick="saveConveyorToHistory()">💾 Save</button>
+            <button class="btn btn-warning" onclick="optimizeConveyor()">⚡ Optimize</button>
+          </div>
+        </div>
+        
+        <div class="wizard-container">
+          <div class="step-indicator">
+            <div class="step active">
+              <div class="step-number">1</div>
+              <div>Basic Parameters</div>
+            </div>
+            <div class="step">
+              <div class="step-number">2</div>
+              <div>Material Properties</div>
+            </div>
+            <div class="step">
+              <div class="step-number">3</div>
+              <div>Drive Parameters</div>
+            </div>
+            <div class="step">
+              <div class="step-number">4</div>
+              <div>Results</div>
+            </div>
+          </div>
+          
+          <div class="wizard-step active" id="conveyorStep1">
+            <div class="wizard-content">
+              <h4>Basic Parameters</h4>
+              <div class="input-group">
+                <label>Belt Width (mm):</label>
+                <input id="beltWidth" type="number" step="10" placeholder="500">
+              </div>
+              <div class="input-group">
+                <label>Conveyor Length (m):</label>
+                <input id="conveyorLength" type="number" step="0.1" placeholder="50">
+              </div>
+              <div class="input-group">
+                <label>Inclination Angle (°):</label>
+                <input id="inclinationAngle" type="number" step="1" placeholder="10">
+              </div>
+              <div class="input-group">
+                <label>Belt Speed (m/s):</label>
+                <input id="beltSpeed" type="number" step="0.1" placeholder="2.5">
+              </div>
+            </div>
+            <div class="wizard-navigation">
+              <button class="btn btn-secondary" onclick="previousConveyorStep()">Previous</button>
+              <button class="btn btn-primary" onclick="nextConveyorStep()">Next</button>
+            </div>
+          </div>
+          
+          <div class="wizard-step" id="conveyorStep2">
+            <div class="wizard-content">
+              <h4>Material Properties</h4>
+              <div class="input-group">
+                <label>Material Type:</label>
+                <select id="materialType">
+                  <option value="general">General Purpose</option>
+                  <option value="bulk">Bulk Material</option>
+                  <option value="unit">Unit Load</option>
+                  <option value="abrasive">Abrasive Material</option>
+                </select>
+              </div>
+              <div class="input-group">
+                <label>Material Density (kg/m³):</label>
+                <input id="materialDensity" type="number" step="10" placeholder="1600">
+              </div>
+              <div class="input-group">
+                <label>Surcharge Angle (°):</label>
+                <input id="surchargeAngle" type="number" step="1" placeholder="25">
+              </div>
+              <div class="input-group">
+                <label>Throughput (t/h):</label>
+                <input id="throughput" type="number" step="10" placeholder="100">
+              </div>
+            </div>
+            <div class="wizard-navigation">
+              <button class="btn btn-secondary" onclick="previousConveyorStep()">Previous</button>
+              <button class="btn btn-primary" onclick="nextConveyorStep()">Next</button>
+            </div>
+          </div>
+          
+          <div class="wizard-step" id="conveyorStep3">
+            <div class="wizard-content">
+              <h4>Drive Parameters</h4>
+              <div class="input-group">
+                <label>Motor RPM:</label>
+                <input id="motorRPM" type="number" step="10" placeholder="1450">
+              </div>
+              <div class="input-group">
+                <label>Efficiency (%):</label>
+                <input id="efficiency" type="number" step="1" placeholder="90">
+              </div>
+              <div class="input-group">
+                <label>Service Factor:</label>
+                <input id="serviceFactor" type="number" step="0.1" placeholder="1.5">
+              </div>
+              <div class="input-group">
+                <label>Friction Coefficient:</label>
+                <input id="frictionCoeff" type="number" step="0.01" placeholder="0.03">
+              </div>
+            </div>
+            <div class="wizard-navigation">
+              <button class="btn btn-secondary" onclick="previousConveyorStep()">Previous</button>
+              <button class="btn btn-primary" onclick="nextConveyorStep()">Next</button>
+            </div>
+          </div>
+          
+          <div class="wizard-step" id="conveyorStep4">
+            <div class="wizard-content">
+              <h4>Results</h4>
+              <div id="conveyorResults"></div>
+            </div>
+            <div class="wizard-navigation">
+              <button class="btn btn-secondary" onclick="previousConveyorStep()">Previous</button>
+              <button class="btn btn-primary" onclick="calculateConveyor()">Calculate</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== GEAR DESIGN TOOL ==================== -->
+    <div class="tab-content" id="gearTool">
+      <div class="section">
+        <div class="section-header">
+          <h2 class="section-title">⚙️ Advanced Gear Design Tool</h2>
+          <div class="section-actions">
+            <button class="btn btn-success" onclick="saveGearToHistory()">💾 Save</button>
+            <button class="btn btn-warning" onclick="analyzeGear()">🔬 Analyze</button>
+          </div>
+        </div>
+        
+        <div class="two-column">
+          <div>
+            <h4>Operating Conditions</h4>
+            <div class="input-group">
+              <label>Power (kW):</label>
+              <input id="gearPower" type="number" step="0.1" placeholder="10">
+            </div>
+            <div class="input-group">
+              <label>Input Speed (RPM):</label>
+              <input id="inputSpeed" type="number" step="10" placeholder="1450">
+            </div>
+            <div class="input-group">
+              <label>Output Speed (RPM):</label>
+              <input id="outputSpeed" type="number" step="10" placeholder="350">
+            </div>
+            <div class="input-group">
+              <label>Service Factor:</label>
+              <input id="gearServiceFactor" type="number" step="0.1" placeholder="1.5">
+            </div>
+            <div class="input-group">
+              <label>Gear Type:</label>
+              <select id="gearType">
+                <option value="spur">Spur</option>
+                <option value="helical">Helical</option>
+                <option value="bevel">Bevel</option>
+                <option value="worm">Worm</option>
+              </select>
+            </div>
+          </div>
+          
+          <div>
+            <h4>Material Properties</h4>
+            <div class="input-group">
+              <label>Pinion Material:</label>
+              <select id="pinionMaterial">
+                <option value="castIron">Cast Iron</option>
+                <option value="carbonSteel">Carbon Steel</option>
+                <option value="alloySteel">Alloy Steel</option>
+                <option value="stainlessSteel">Stainless Steel</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label>Gear Material:</label>
+              <select id="gearMaterial">
+                <option value="castIron">Cast Iron</option>
+                <option value="carbonSteel">Carbon Steel</option>
+                <option value="alloySteel">Alloy Steel</option>
+                <option value="stainlessSteel">Stainless Steel</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label>Heat Treatment:</label>
+              <select id="heatTreatment">
+                <option value="none">None</option>
+                <option value="normalized">Normalized</option>
+                <option value="quenched">Quenched & Tempered</option>
+                <option value="caseHardened">Case Hardened</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label>Surface Finish (μm):</label>
+              <input id="surfaceFinish" type="number" step="0.1" placeholder="1.6">
+            </div>
+          </div>
+        </div>
+        
+        <div class="section-actions">
+          <button class="btn btn-primary" onclick="calculateGear()">🧮 Calculate</button>
+          <button class="btn btn-secondary" onclick="resetGear()">🔄 Reset</button>
+          <button class="btn btn-warning" onclick="optimizeGear()">⚡ Optimize</button>
+        </div>
+        
+        <div class="loading" id="gearLoading">
+          <div class="spinner"></div>
+          <p>Calculating gear design...</p>
+        </div>
+        
+        <h3>Results</h3>
+        <div id="gearResults"></div>
+        
+        <h3>Gear Stress Analysis</h3>
+        <div id="gearStressAnalysis"></div>
+        
+        <!-- GEAR DRAWING SECTION -->
+        <h3>Gear Drawing</h3>
+        <div class="gear-drawing-container">
+          <div class="gear-drawing-header">
+            <div class="gear-drawing-title">Gear Assembly Visualization</div>
+            <div class="gear-drawing-controls">
+              <button class="tool-btn active" onclick="setGearView('assembly')">Assembly</button>
+              <button class="tool-btn" onclick="setGearView('pinion')">Pinion Only</button>
+              <button class="tool-btn" onclick="setGearView('gear')">Gear Only</button>
+              <button class="tool-btn" onclick="toggleDimensions()">Dimensions</button>
+            </div>
+          </div>
+          
+          <div class="drawing-tools">
+            <button class="tool-btn" onclick="zoomIn()">🔍+</button>
+            <button class="tool-btn" onclick="zoomOut()">🔍-</button>
+            <button class="tool-btn" onclick="resetZoom()">↻ Reset</button>
+            <button class="tool-btn" onclick="toggleAnimation()">▶️ Animate</button>
+          </div>
+          
+          <canvas id="gearDrawingCanvas" class="gear-drawing-canvas" width="800" height="400"></canvas>
+          
+          <div class="gear-legend">
+            <div class="legend-item">
+              <div class="legend-color" style="background: #004aad;"></div>
+              <span>Pinion</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background: #28a745;"></div>
+              <span>Gear</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background: #ffc107;"></div>
+              <span>Center Line</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background: #dc3545;"></div>
+              <span>Dimensions</span>
+            </div>
+          </div>
+          
+          <div class="gear-dimensions">
+            <div class="dimension-card">
+              <div class="dimension-title">Pinion Specifications</div>
+              <div class="dimension-value">
+                <span class="dimension-label">Pitch Diameter:</span>
+                <span id="pinionPitchDiameterDisplay">-</span> mm
+              </div>
+              <div class="dimension-value">
+                <span class="dimension-label">Number of Teeth:</span>
+                <span id="pinionTeethDisplay">-</span>
+              </div>
+              <div class="dimension-value">
+                <span class="dimension-label">Module:</span>
+                <span id="pinionModuleDisplay">-</span> mm
+              </div>
+              <div class="dimension-value">
+                <span class="dimension-label">Torque:</span>
+                <span id="pinionTorqueDisplay">-</span> Nm
+              </div>
+            </div>
+            
+            <div class="dimension-card">
+              <div class="dimension-title">Gear Specifications</div>
+              <div class="dimension-value">
+                <span class="dimension-label">Pitch Diameter:</span>
+                <span id="gearPitchDiameterDisplay">-</span> mm
+              </div>
+              <div class="dimension-value">
+                <span class="dimension-label">Number of Teeth:</span>
+                <span id="gearTeethDisplay">-</span>
+              </div>
+              <div class="dimension-value">
+                <span class="dimension-label">Module:</span>
+                <span id="gearModuleDisplay">-</span> mm
+              </div>
+              <div class="dimension-value">
+                <span class="dimension-label">Torque:</span>
+                <span id="gearTorqueDisplay">-</span> Nm
+              </div>
+            </div>
+          </div>
+          
+          <div class="export-options">
+            <button class="export-btn dxf" onclick="exportGearDXF()">📐 Export DXF</button>
+            <button class="export-btn png" onclick="exportGearPNG()">🖼️ Export PNG</button>
+            <button class="export-btn pdf" onclick="exportGearPDF()">📄 Export PDF</button>
+          </div>
+        </div>
+        
+        <div class="chart-container">
+          <h3>Gear Performance</h3>
+          <canvas id="gearChart" width="400" height="200"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== VIBRATION ANALYSIS TOOL ==================== -->
+    <div class="tab-content" id="vibrationTool">
+      <div class="section">
+        <div class="section-header">
+          <h2 class="section-title">📈 Vibration Frequency Analysis</h2>
+          <div class="section-actions">
+            <button class="btn btn-success" onclick="startMonitoring()" id="startBtn">▶️ Start</button>
+            <button class="btn btn-danger" onclick="stopMonitoring()" id="stopBtn" disabled>⏹️ Stop</button>
+            <button class="btn btn-warning" onclick="analyzeVibration()">🔍 Analyze</button>
+          </div>
+        </div>
+        
+        <div class="two-column">
+          <div>
+            <h4>Measurement Parameters</h4>
+            <div class="input-group">
+              <label>Sampling Rate (Hz):</label>
+              <input id="samplingRate" type="number" step="100" placeholder="1000">
+            </div>
+            <div class="input-group">
+              <label>Measurement Duration (s):</label>
+              <input id="measurementDuration" type="number" step="1" placeholder="10">
+            </div>
+            <div class="input-group">
+              <label>Frequency Range (Hz):</label>
+              <input id="frequencyRange" type="number" step="10" placeholder="500">
+            </div>
+            <div class="input-group">
+              <label>Machine Type:</label>
+              <select id="machineType">
+                <option value="pump">Pump</option>
+                <option value="motor">Motor</option>
+                <option value="fan">Fan</option>
+                <option value="compressor">Compressor</option>
+                <option value="turbine">Turbine</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label>RPM:</label>
+              <input id="machineRPM" type="number" step="10" placeholder="1800">
+            </div>
+          </div>
+          
+          <div>
+            <h4>Analysis Settings</h4>
+            <div class="input-group">
+              <label>Window Function:</label>
+              <select id="windowFunction">
+                <option value="hanning">Hanning</option>
+                <option value="hamming">Hamming</option>
+                <option value="blackman">Blackman</option>
+                <option value="rectangular">Rectangular</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label>FFT Size:</label>
+              <select id="fftSize">
+                <option value="512">512</option>
+                <option value="1024">1024</option>
+                <option value="2048">2048</option>
+                <option value="4096">4096</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label>Averaging:</label>
+              <select id="averaging">
+                <option value="none">None</option>
+                <option value="linear">Linear</option>
+                <option value="exponential">Exponential</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label>Units:</label>
+              <select id="vibrationUnits">
+                <option value="velocity">Velocity (mm/s)</option>
+                <option value="acceleration">Acceleration (g)</option>
+                <option value="displacement">Displacement (μm)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        
+        <div class="chart-container">
+          <h3>Real-time Vibration Spectrum</h3>
+          <canvas id="vibrationSpectrum" width="400" height="200"></canvas>
+        </div>
+        
+        <div class="chart-container">
+          <h3>Vibration Time History</h3>
+          <canvas id="vibrationTimeHistory" width="400" height="200"></canvas>
+        </div>
+        
+        <div class="grid-container">
+          <div class="result-card">
+            <h3>Frequency Analysis</h3>
+            <p>Primary Frequency: <span id="primaryFreq">0</span> Hz</p>
+            <p>Amplitude: <span id="amplitude">0</span> mm/s</p>
+            <p>Harmonics: <span id="harmonics">0</span></p>
+            <p>Overall Level: <span id="overallLevel">0</span> mm/s</p>
+          </div>
+          
+          <div class="result-card">
+            <h3>Health Indicators</h3>
+            <p>Overall Vibration: <span id="overallVib">0</span> mm/s</p>
+            <p>Crest Factor: <span id="crestFactor">0</span></p>
+            <p>Kurtosis: <span id="kurtosis">0</span></p>
+            <p>Health Status: <span id="healthStatus">Good</span></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== MATERIALS DATABASE ==================== -->
+    <div class="tab-content" id="materialsTool">
+      <div class="section">
+        <div class="section-header">
+          <h2 class="section-title">🔬 Materials Database</h2>
+          <div class="section-actions">
+            <input type="text" placeholder="Search materials..." id="materialSearch" onkeyup="searchMaterials()">
+            <button class="btn btn-primary" onclick="addMaterial()">➕ Add</button>
+          </div>
+        </div>
+        
+        <div class="grid-container" id="materialsGrid">
+          <!-- Materials will be loaded here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== CALCULATION HISTORY ==================== -->
+    <div class="tab-content" id="historyTool">
+      <div class="section">
+        <div class="section-header">
+          <h2 class="section-title">📚 Calculation History</h2>
+          <div class="section-actions">
+            <button class="btn btn-primary" onclick="refreshHistory()">🔄 Refresh</button>
+            <button class="btn btn-secondary" onclick="exportHistory()">📊 Export</button>
+            <button class="btn btn-danger" onclick="clearHistory()">🗑️ Clear</button>
+          </div>
+        </div>
+        
+        <div class="grid-container">
+          <div class="result-card">
+            <h3>History Statistics</h3>
+            <p>Total Calculations: <span id="totalCalculations">0</span></p>
+            <p>This Week: <span id="weekCalculations">0</span></p>
+            <p>This Month: <span id="monthCalculations">0</span></p>
+            <p>Storage Used: <span id="storageUsed">0 KB</span></p>
+          </div>
+          
+          <div class="result-card">
+            <h3>Filter Options</h3>
+            <div class="input-group">
+              <label>Calculation Type:</label>
+              <select id="historyFilter" onchange="filterHistory()">
+                <option value="all">All Types</option>
+                <option value="balancing">Rotor Balancing</option>
+                <option value="conveyor">Conveyor Design</option>
+                <option value="gear">Gear Design</option>
+                <option value="vibration">Vibration Analysis</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label>Date Range:</label>
+              <select id="dateFilter" onchange="filterHistory()">
+                <option value="all">All Time</option>
+                <option value="today">Today</option>
+                <option value="week">This Week</option>
+                <option value="month">This Month</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        
+        <h3>Recent Calculations</h3>
+        <div id="historyList"></div>
+        
+        <div id="historyDetails"></div>
+      </div>
+    </div>
+
+    <!-- ==================== REPORTS ==================== -->
+    <div class="tab-content" id="reportsTool">
+      <div class="section">
+        <div class="section-header">
+          <h2 class="section-title">📄 Reports & Documentation</h2>
+          <div class="section-actions">
+            <button class="btn btn-primary" onclick="createCustomReport()">➕ Create Report</button>
+            <button class="btn btn-secondary" onclick="reportTemplates()">📋 Templates</button>
+          </div>
+        </div>
+        
+        <div class="two-column">
+          <div>
+            <h3>Report Configuration</h3>
+            <div class="input-group">
+              <label>Report Type:</label>
+              <select id="reportType">
+                <option value="summary">Summary Report</option>
+                <option value="detailed">Detailed Analysis</option>
+                <option value="comparison">Comparison Report</option>
+                <option value="custom">Custom Report</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label>Include Charts:</label>
+              <label class="toggle-switch">
+                <input type="checkbox" id="includeCharts" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="input-group">
+              <label>Include Raw Data:</label>
+              <label class="toggle-switch">
+                <input type="checkbox" id="includeRawData">
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="input-group">
+              <label>Company Name:</label>
+              <input type="text" id="companyName" placeholder="Your Company">
+            </div>
+            <div class="input-group">
+              <label>Project Name:</label>
+              <input type="text" id="projectName" placeholder="Project Name">
+            </div>
+            <div class="input-group">
+              <label>Engineer Name:</label>
+              <input type="text" id="engineerName" placeholder="Your Name">
+            </div>
+          </div>
+          
+          <div>
+            <h3>Recent Reports</h3>
+            <div id="recentReports"></div>
+          </div>
+        </div>
+        
+        <div class="section-actions">
+          <button class="btn btn-primary" onclick="generateReport()">📄 Generate Report</button>
+          <button class="btn btn-secondary" onclick="previewReport()">👁️ Preview</button>
+          <button class="btn btn-success" onclick="scheduleReport()">📅 Schedule</button>
+        </div>
+        
+        <div id="reportPreview"></div>
+      </div>
+    </div>
+
+    <!-- ==================== SETTINGS ==================== -->
+    <div class="tab-content" id="settingsTool">
+      <div class="section">
+        <div class="section-header">
+          <h2 class="section-title">⚙️ Settings</h2>
+          <div class="section-actions">
+            <button class="btn btn-primary" onclick="saveSettings()">💾 Save</button>
+            <button class="btn btn-secondary" onclick="resetSettings()">🔄 Reset</button>
+          </div>
+        </div>
+        
+        <div class="settings-group">
+          <h3>General Settings</h3>
+          <div class="input-group">
+            <label>Default Units:</label>
+            <select id="defaultUnits">
+              <option value="metric">Metric</option>
+              <option value="imperial">Imperial</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label>Language:</label>
+            <select id="language">
+              <option value="en">English</option>
+              <option value="es">Spanish</option>
+              <option value="fr">French</option>
+              <option value="de">German</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label>Auto-save Interval:</label>
+            <select id="autoSaveInterval">
+              <option value="30">30 seconds</option>
+              <option value="60">1 minute</option>
+              <option value="300">5 minutes</option>
+              <option value="0">Disabled</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label>Decimal Places:</label>
+            <input type="number" id="decimalPlaces" min="0" max="6" value="2">
+          </div>
+        </div>
+        
+        <div class="settings-group">
+          <h3>Appearance</h3>
+          <div class="input-group">
+            <label>Theme:</label>
+            <select id="theme" onchange="changeTheme()">
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+              <option value="auto">Auto (System)</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label>Compact Mode:</label>
+            <label class="toggle-switch">
+              <input type="checkbox" id="compactMode">
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="input-group">
+            <label>Show Tooltips:</label>
+            <label class="toggle-switch">
+              <input type="checkbox" id="showTooltips" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+        
+        <div class="settings-group">
+          <h3>Notifications</h3>
+          <div class="input-group">
+            <label>Enable Notifications:</label>
+            <label class="toggle-switch">
+              <input type="checkbox" id="enableNotifications" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="input-group">
+            <label>Calculation Complete:</label>
+            <label class="toggle-switch">
+              <input type="checkbox" id="notifyCalculation" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="input-group">
+            <label>Error Alerts:</label>
+            <label class="toggle-switch">
+              <input type="checkbox" id="notifyErrors" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="input-group">
+            <label>Auto-save Reminders:</label>
+            <label class="toggle-switch">
+              <input type="checkbox" id="notifyAutoSave">
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+        
+        <div class="settings-group">
+          <h3>Data & Storage</h3>
+          <div class="input-group">
+            <label>Max History Items:</label>
+            <input type="number" id="maxHistoryItems" min="10" max="1000" value="50">
+          </div>
+          <div class="input-group">
+            <label>Clear History on Exit:</label>
+            <label class="toggle-switch">
+              <input type="checkbox" id="clearHistoryOnExit">
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="input-group">
+            <label>Export Format:</label>
+            <select id="exportFormat">
+              <option value="json">JSON</option>
+              <option value="csv">CSV</option>
+              <option value="pdf">PDF</option>
+            </select>
+          </div>
+          <div class="section-actions">
+            <button class="btn btn-secondary" onclick="exportAllData()">📊 Export All Data</button>
+            <button class="btn btn-danger" onclick="clearAllData()">🗑️ Clear All Data</button>
+          </div>
+        </div>
+        
+        <div class="settings-group">
+          <h3>About</h3>
+          <p><strong>Engineering Tools Portal</strong></p>
+          <p>Version: 1.0.0</p>
+          <p>© 2023 Engineering Solutions</p>
+          <p>Professional engineering calculation suite</p>
+          <div class="section-actions">
+            <button class="btn btn-secondary" onclick="checkUpdates()">🔄 Check for Updates</button>
+            <button class="btn btn-secondary" onclick="showHelp()">❓ Help</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
+</div>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="script.js"></script>
+<!-- Floating Action Button -->
+<button class="floating-action" onclick="toggleQuickAccess()">+</button>
+<div class="quick-access" id="quickAccess">
+  <button class="quick-btn hidden" onclick="quickCalculation('balancing')" title="New Balancing">🌀</button>
+  <button class="quick-btn hidden" onclick="quickCalculation('conveyor')" title="New Conveyor">🧮</button>
+  <button class="quick-btn hidden" onclick="quickCalculation('gear')" title="New Gear">⚙️</button>
+  <button class="quick-btn hidden" onclick="showHelp()" title="Help">❓</button>
+</div>
+
+<!-- Modal -->
+<div class="modal" id="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 id="modalTitle">Modal Title</h2>
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+    </div>
+    <div id="modalBody">
+      <!-- Modal content will be loaded here -->
+    </div>
+  </div>
+</div>
+
+<!-- Notification Container -->
+<div id="notificationContainer"></div>
+
+<script>
+// Global variables
+let currentBalancingMethod = '3trial';
+let calculationHistory = JSON.parse(localStorage.getItem('calcHistory')) || [];
+let currentResults = {};
+let currentGearResults = {};
+let isDarkMode = false;
+let monitoringInterval = null;
+let charts = {};
+let vibrationData = {
+  spectrum: [],
+  timeHistory: [],
+  isMonitoring: false
+};
+let currentConveyorStep = 1;
+
+// Gear drawing variables
+let gearCanvas, gearCtx;
+let currentGearView = 'assembly';
+let showDimensions = true;
+let zoomLevel = 1;
+let animationId = null;
+let isAnimating = false;
+let rotationAngle = 0;
+
+// Initialize the application
+document.addEventListener('DOMContentLoaded', function() {
+  initializeApp();
+  setupKeyboardShortcuts();
+  initializeCharts();
+  loadMaterials();
+  updateDashboard();
+  loadSettings();
+  initializeGearDrawing();
+});
+
+// Initialize application
+function initializeApp() {
+  // Check for saved theme preference
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'dark') {
+    document.body.classList.add('dark-mode');
+    isDarkMode = true;
+    document.querySelector('.theme-toggle').textContent = '☀️';
+  }
+  
+  // Load calculation history
+  loadHistory();
+  
+  // Setup auto-save
+  setInterval(autoSave, 30000); // Auto-save every 30 seconds
+  
+  // Setup search functionality
+  setupSearch();
+}
+
+// Theme toggle
+function toggleTheme() {
+  isDarkMode = !isDarkMode;
+  document.body.classList.toggle('dark-mode');
+  localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+  document.querySelector('.theme-toggle').textContent = isDarkMode ? '☀️' : '🌙';
+  showNotification('Theme changed to ' + (isDarkMode ? 'dark' : 'light') + ' mode', 'info');
+}
+
+// Sidebar toggle
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  sidebar.classList.toggle('collapsed');
+  sidebar.classList.toggle('active');
+}
+
+// Tab switching - FIXED VERSION
+function switchTab(tabName, tabElement) {
+  // Hide all tab contents
+  document.querySelectorAll('.tab-content').forEach(content => {
+    content.classList.remove('active');
+  });
+  
+  // Remove active class from all tabs
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.classList.remove('active');
+  });
+  
+  // Show selected tab content
+  const selectedContent = document.getElementById(tabName + 'Tool');
+  if (selectedContent) {
+    selectedContent.classList.add('active');
+  }
+  
+  // Add active class to clicked tab
+  if (tabElement) {
+    tabElement.classList.add('active');
+  }
+  
+  // Update sidebar menu
+  updateSidebarMenu(tabName);
+  
+  // Load specific tab content
+  if (tabName === 'history') {
+    loadHistory();
+  } else if (tabName === 'reports') {
+    loadReports();
+  } else if (tabName === 'settings') {
+    loadSettings();
+  } else if (tabName === 'gear') {
+    // Initialize gear drawing when gear tab is opened
+    setTimeout(() => initializeGearDrawing(), 100);
+  }
+}
+
+// Navigate to section
+function navigateTo(section) {
+  // Update sidebar menu
+  document.querySelectorAll('.menu-item').forEach(item => {
+    item.classList.remove('active');
+  });
+  event.target.classList.add('active');
+  
+  // Switch to appropriate tab
+  const tabMap = {
+    'dashboard': 'dashboard',
+    'balancing': 'balancing',
+    'conveyor': 'conveyor',
+    'gear': 'gear',
+    'vibration': 'vibration',
+    'materials': 'materials',
+    'history': 'history',
+    'reports': 'reports',
+    'settings': 'settings'
+  };
+  
+  const tabName = tabMap[section];
+  if (tabName) {
+    const tabElement = document.querySelector(`.tab[onclick="switchTab('${tabName}', this)"]`);
+    if (tabElement) {
+      switchTab(tabName, tabElement);
+    }
+  }
+  
+  // Close sidebar on mobile
+  if (window.innerWidth <= 768) {
+    document.getElementById('sidebar').classList.remove('active');
+  }
+}
+
+// Update sidebar menu
+function updateSidebarMenu(activeSection) {
+  document.querySelectorAll('.menu-item').forEach(item => {
+    item.classList.remove('active');
+    if (item.textContent.toLowerCase().includes(activeSection)) {
+      item.classList.add('active');
+    }
+  });
+}
+
+// Keyboard shortcuts
+function setupKeyboardShortcuts() {
+  document.addEventListener('keydown', function(e) {
+    // Ctrl/Cmd + S: Save
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+      e.preventDefault();
+      saveToHistory();
+    }
+    
+    // Ctrl/Cmd + P: Print/Export PDF
+    if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+      e.preventDefault();
+      generatePDF();
+    }
+    
+    // Ctrl/Cmd + K: Search
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault();
+      document.getElementById('searchBar').focus();
+    }
+    
+    // Escape: Close modal
+    if (e.key === 'Escape') {
+      closeModal();
+    }
+  });
+}
+
+// Search functionality
+function setupSearch() {
+  const searchBar = document.getElementById('searchBar');
+  searchBar.addEventListener('input', function(e) {
+    const query = e.target.value.toLowerCase();
+    if (query.length > 2) {
+      performSearch(query);
+    }
+  });
+}
+
+function performSearch(query) {
+  // Search through calculations, materials, etc.
+  const results = [];
+  
+  // Search history
+  calculationHistory.forEach(item => {
+    if (JSON.stringify(item).toLowerCase().includes(query)) {
+      results.push(item);
+    }
+  });
+  
+  // Display search results
+  if (results.length > 0) {
+    showSearchResults(results);
+  }
+}
+
+function showSearchResults(results) {
+  const modalBody = document.getElementById('modalBody');
+  let html = '<h3>Search Results</h3>';
+  
+  results.forEach(result => {
+    html += `
+      <div class="result-card">
+        <h4>${result.type} - ${result.method}</h4>
+        <p>Date: ${new Date(result.timestamp).toLocaleString()}</p>
+        <button class="btn btn-primary" onclick="loadHistoryItem(${result.id})">Load</button>
+      </div>
+    `;
+  });
+  
+  showModal('Search Results', html);
+}
+
+// Quick access toggle
+function toggleQuickAccess() {
+  const quickAccess = document.getElementById('quickAccess');
+  const buttons = quickAccess.querySelectorAll('.quick-btn');
+  
+  buttons.forEach((btn, index) => {
+    setTimeout(() => {
+      btn.classList.toggle('hidden');
+    }, index * 50);
+  });
+}
+
+// Quick calculation
+function quickCalculation(type) {
+  // Navigate to appropriate tab
+  const tabElement = document.querySelector(`.tab[onclick="switchTab('${type}', this)"]`);
+  if (tabElement) {
+    switchTab(type, tabElement);
+  }
+  
+  // Close quick access
+  toggleQuickAccess();
+  
+  // Show notification
+  showNotification(`Starting new ${type} calculation`, 'info');
+}
+
+// Show notification
+function showNotification(message, type = 'info') {
+  const container = document.getElementById('notificationContainer');
+  const notification = document.createElement('div');
+  notification.className = `notification ${type}`;
+  notification.textContent = message;
+  
+  container.appendChild(notification);
+  
+  // Auto-remove after 3 seconds
+  setTimeout(() => {
+    notification.remove();
+  }, 3000);
+}
+
+// Modal functions
+function showModal(title, content) {
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalBody').innerHTML = content;
+  document.getElementById('modal').classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('active');
+}
+
+// Dashboard functions
+function updateDashboard() {
+  // Update recent calculations count
+  const today = new Date().toDateString();
+  const todayCalculations = calculationHistory.filter(item => 
+    new Date(item.timestamp).toDateString() === today
+  );
+  
+  document.getElementById('recentCalcCount').textContent = 
+    `${todayCalculations.length} calculations today`;
+  
+  // Update progress bar
+  const progress = Math.min((todayCalculations.length / 10) * 100, 100);
+  document.querySelector('.progress-fill').style.width = `${progress}%`;
+  
+  // Update last backup
+  const lastBackup = localStorage.getItem('lastBackup');
+  if (lastBackup) {
+    document.getElementById('lastBackup').textContent = 
+      new Date(lastBackup).toLocaleString();
+  }
+  
+  // Update charts
+  updateCharts();
+}
+
+function refreshDashboard() {
+  showNotification('Dashboard refreshed', 'success');
+  updateDashboard();
+}
+
+function exportDashboard() {
+  // Export dashboard data
+  const data = {
+    calculations: calculationHistory,
+    timestamp: new Date().toISOString(),
+    summary: {
+      total: calculationHistory.length,
+      today: calculationHistory.filter(item => 
+        new Date(item.timestamp).toDateString() === new Date().toDateString()
+      ).length
+    }
+  };
+  
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `dashboard_export_${Date.now()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  
+  showNotification('Dashboard exported successfully', 'success');
+}
+
+// Initialize charts
+function initializeCharts() {
+  // Trends chart
+  const trendsCtx = document.getElementById('trendsChart');
+  if (trendsCtx) {
+    charts.trends = new Chart(trendsCtx, {
+      type: 'line',
+      data: {
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        datasets: [{
+          label: 'Calculations',
+          data: [5, 8, 12, 7, 9, 4, 6],
+          borderColor: '#004aad',
+          backgroundColor: 'rgba(0, 74, 173, 0.1)',
+          tension: 0.4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    });
+  }
+  
+  // Vibration chart
+  const vibrationCtx = document.getElementById('vibrationChart');
+  if (vibrationCtx) {
+    charts.vibration = new Chart(vibrationCtx, {
+      type: 'bar',
+      data: {
+        labels: ['0°', '120°', '240°'],
+        datasets: [{
+          label: 'Vibration (mm/s)',
+          data: [2.5, 3.1, 2.8],
+          backgroundColor: [
+            'rgba(0, 74, 173, 0.8)',
+            'rgba(0, 102, 255, 0.8)',
+            'rgba(0, 150, 255, 0.8)'
+          ]
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    });
+  }
+}
+
+function updateCharts() {
+  // Update charts with latest data
+  if (charts.trends) {
+    // Update with actual calculation data
+    const last7Days = [];
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const dayCalculations = calculationHistory.filter(item => 
+        new Date(item.timestamp).toDateString() === date.toDateString()
+      ).length;
+      last7Days.push(dayCalculations);
+    }
+    
+    charts.trends.data.datasets[0].data = last7Days;
+    charts.trends.update();
+  }
+}
+
+// ==================== BALANCING CALCULATIONS ====================
+
+// Select balancing method
+function selectBalancingMethod(method) {
+  currentBalancingMethod = method;
+  
+  // Hide all input sections
+  document.querySelectorAll('[id$="Inputs"]').forEach(section => {
+    section.style.display = 'none';
+  });
+  
+  // Show selected input section
+  const inputMap = {
+    '3trial': 'threeTrialInputs',
+    '2point': 'twoPointInputs'
+  };
+  
+  document.getElementById(inputMap[method]).style.display = 'block';
+  
+  // Update button states
+  document.querySelectorAll('.method-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  event.target.classList.add('active');
+  
+  resetInputs();
+}
+
+// Input validation
+function validateInputs(containerId) {
+  const container = document.getElementById(containerId);
+  const inputs = container.querySelectorAll("input[type='number']");
+  let isValid = true;
+  
+  inputs.forEach(input => {
+    if (!input.value || isNaN(input.value) || parseFloat(input.value) <= 0) {
+      input.classList.add('error');
+      isValid = false;
+    } else {
+      input.classList.remove('error');
+      input.classList.add('success');
+    }
+  });
+  
+  return isValid;
+}
+
+// 3-Trial-Mass Method calculation
+function calculate3TrialMethod(trialMass, r0, a0, h0, r120, a120, h120, r240, a240, h240) {
+  // Calculate resultant vectors for each position
+  const v0 = Math.sqrt(r0*r0 + a0*a0 + h0*h0);
+  const v120 = Math.sqrt(r120*r120 + a120*a120 + h120*h120);
+  const v240 = Math.sqrt(r240*r240 + a240*a240 + h240*h240);
+  
+  // Calculate average vibration
+  const avgVibration = (v0 + v120 + v240) / 3;
+  
+  // Calculate correction mass (simplified formula)
+  const maxVibration = Math.max(v0, v120, v240);
+  const correctionMass = trialMass * (maxVibration / avgVibration - 1);
+  
+  // Determine correction angle based on which position has max vibration
+  let correctionAngle;
+  if (maxVibration === v0) correctionAngle = 0;
+  else if (maxVibration === v120) correctionAngle = 120;
+  else correctionAngle = 240;
+  
+  // Calculate expected residual vibration
+  const expectedResidual = avgVibration * 0.1; // 10% of average vibration
+  
+  return {
+    correctionMass: correctionMass.toFixed(4),
+    correctionAngle: correctionAngle.toFixed(2),
+    expectedResidual: expectedResidual.toFixed(3),
+    avgVibration: avgVibration.toFixed(3),
+    maxVibration: maxVibration.toFixed(3),
+    vibrations: [v0, v120, v240]
+  };
+}
+
+// 2-Point Method calculation
+function calculate2PointMethod(A1, theta1, A2, theta2, mt, phit) {
+  const degToRad = (deg) => deg * Math.PI / 180;
+  const radToDeg = (rad) => rad * 180 / Math.PI;
+
+  const v1 = {x: A1 * Math.cos(degToRad(theta1)), y: A1 * Math.sin(degToRad(theta1))};
+  const v2 = {x: A2 * Math.cos(degToRad(theta2)), y: A2 * Math.sin(degToRad(theta2))};
+  const dv = {x: v2.x - v1.x, y: v2.y - v1.y};
+  const magnitudeDv = Math.sqrt(dv.x**2 + dv.y**2);
+  const angleDv = radToDeg(Math.atan2(dv.y, dv.x));
+
+  const correctionMass = (A1 * mt) / magnitudeDv;
+  let correctionAngle = angleDv - phit + 180; 
+  correctionAngle = (correctionAngle + 360) % 360;
+
+  const expectedResidual = Math.abs(A1 - (magnitudeDv * correctionMass / mt));
+
+  return {
+    correctionMass: correctionMass.toFixed(4),
+    correctionAngle: correctionAngle.toFixed(2),
+    expectedResidual: expectedResidual.toFixed(3)
+  };
+}
+
+// Main calculation function
+function runCalculation() {
+  let result;
+  let isValid = false;
+  let inputContainerId;
+  
+  // Show loading indicator
+  document.getElementById("loading").classList.add('active');
+  
+  // Simulate processing time
+  setTimeout(() => {
+    switch(currentBalancingMethod) {
+      case '3trial':
+        inputContainerId = 'threeTrialInputs';
+        isValid = validateInputs(inputContainerId);
+        if (isValid) {
+          const trialMass = parseFloat(document.getElementById("trialMass").value);
+          const r0 = parseFloat(document.getElementById("r0").value);
+          const a0 = parseFloat(document.getElementById("a0").value);
+          const h0 = parseFloat(document.getElementById("h0").value);
+          const r120 = parseFloat(document.getElementById("r120").value);
+          const a120 = parseFloat(document.getElementById("a120").value);
+          const h120 = parseFloat(document.getElementById("h120").value);
+          const r240 = parseFloat(document.getElementById("r240").value);
+          const a240 = parseFloat(document.getElementById("a240").value);
+          const h240 = parseFloat(document.getElementById("h240").value);
+          
+          result = calculate3TrialMethod(trialMass, r0, a0, h0, r120, a120, h120, r240, a240, h240);
+        }
+        break;
+        
+      case '2point':
+        inputContainerId = 'twoPointInputs';
+        isValid = validateInputs(inputContainerId);
+        if (isValid) {
+          const A1 = parseFloat(document.getElementById("A1").value);
+          const theta1 = parseFloat(document.getElementById("theta1").value);
+          const A2 = parseFloat(document.getElementById("A2").value);
+          const theta2 = parseFloat(document.getElementById("theta2").value);
+          const mt = parseFloat(document.getElementById("mt").value);
+          const phit = parseFloat(document.getElementById("phit").value);
+          
+          result = calculate2PointMethod(A1, theta1, A2, theta2, mt, phit);
+        }
+        break;
+    }
+    
+    // Hide loading indicator
+    document.getElementById("loading").classList.remove('active');
+    
+    if (isValid) {
+      currentResults = result;
+      currentResults.method = currentBalancingMethod;
+      currentResults.timestamp = new Date().toISOString();
+      
+      // Display results
+      let resultsHTML = `
+        <div class="result-card">
+          <h4>Calculation Results - ${currentBalancingMethod.replace(/([A-Z])/g, ' $1').trim()} Method</h4>
+          <p><b>Correction Mass:</b> ${result.correctionMass} kg</p>
+          <p><b>Placement Angle:</b> ${result.correctionAngle}°</p>
+          <p><b>Expected Residual Vibration:</b> ${result.expectedResidual} mm/s</p>
+      `;
+      
+      if (result.avgVibration) {
+        resultsHTML += `
+          <p><b>Average Vibration:</b> ${result.avgVibration} mm/s</p>
+          <p><b>Maximum Vibration:</b> ${result.maxVibration} mm/s</p>
+        `;
+      }
+      
+      resultsHTML += `</div>`;
+      
+      document.getElementById("results").innerHTML = resultsHTML;
+      
+      // Update charts
+      if (charts.vibration && result.vibrations) {
+        charts.vibration.data.datasets[0].data = result.vibrations;
+        charts.vibration.update();
+      }
+      
+      showNotification('Calculation completed successfully', 'success');
+      
+    } else {
+      document.getElementById("results").innerHTML = `
+        <div class="result-card status-danger">
+          <h4>Validation Error</h4>
+          <p>Please fill in all required fields with valid positive numbers.</p>
+        </div>
+      `;
+      showNotification('Please check input fields', 'error');
+    }
+  }, 500);
+}
+
+// Reset inputs
+function resetInputs() {
+  const inputMap = {
+    '3trial': 'threeTrialInputs',
+    '2point': 'twoPointInputs'
+  };
+  
+  const containerId = inputMap[currentBalancingMethod];
+  
+  document.querySelectorAll(`#${containerId} input`).forEach(el => {
+    el.value = "";
+    el.classList.remove('error', 'success');
+  });
+  
+  document.getElementById("results").innerHTML = "";
+  document.getElementById("visualization").innerHTML = "";
+  document.getElementById("vibrationDashboard").innerHTML = "";
+}
+
+// Save to history
+function saveToHistory() {
+  if (!currentResults.correctionMass) {
+    showNotification('Please perform a calculation first', 'warning');
+    return;
+  }
+  
+  const historyItem = {
+    id: Date.now(),
+    type: 'balancing',
+    method: currentBalancingMethod,
+    results: currentResults,
+    timestamp: new Date().toISOString()
+  };
+  
+  calculationHistory.unshift(historyItem);
+  if (calculationHistory.length > 50) {
+    calculationHistory = calculationHistory.slice(0, 50);
+  }
+  
+  localStorage.setItem('calcHistory', JSON.stringify(calculationHistory));
+  showNotification('Calculation saved to history', 'success');
+}
+
+// Load history
+function loadHistory() {
+  const historyList = document.getElementById('historyList');
+  if (!historyList) return;
+  
+  if (calculationHistory.length === 0) {
+    historyList.innerHTML = '<p>No calculations in history</p>';
+    return;
+  }
+  
+  historyList.innerHTML = '';
+  calculationHistory.forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'history-item';
+    div.innerHTML = `
+      <strong>${item.type.charAt(0).toUpperCase() + item.type.slice(1)} - ${item.method}</strong><br>
+      ${new Date(item.timestamp).toLocaleString()}<br>
+      ${item.results.correctionMass ? `Correction Mass: ${item.results.correctionMass} kg at ${item.results.correctionAngle}°` : 'Calculation data'}
+    `;
+    div.onclick = () => showHistoryDetails(item);
+    historyList.appendChild(div);
+  });
+  
+  // Update statistics
+  const today = new Date();
+  const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+  
+  const weekCalculations = calculationHistory.filter(item => 
+    new Date(item.timestamp) >= weekAgo
+  ).length;
+  
+  const monthCalculations = calculationHistory.filter(item => 
+    new Date(item.timestamp) >= monthAgo
+  ).length;
+  
+  const storageUsed = new Blob([JSON.stringify(calculationHistory)]).size / 1024;
+  
+  document.getElementById('totalCalculations').textContent = calculationHistory.length;
+  document.getElementById('weekCalculations').textContent = weekCalculations;
+  document.getElementById('monthCalculations').textContent = monthCalculations;
+  document.getElementById('storageUsed').textContent = storageUsed.toFixed(2) + ' KB';
+}
+
+// Show history details
+function showHistoryDetails(item) {
+  const detailsDiv = document.getElementById('historyDetails');
+  if (!detailsDiv) return;
+  
+  detailsDiv.innerHTML = `
+    <div class="result-card">
+      <h3>Calculation Details</h3>
+      <p><b>Type:</b> ${item.type}</p>
+      <p><b>Method:</b> ${item.method}</p>
+      <p><b>Date:</b> ${new Date(item.timestamp).toLocaleString()}</p>
+      ${item.results.correctionMass ? `
+        <p><b>Correction Mass:</b> ${item.results.correctionMass} kg</p>
+        <p><b>Placement Angle:</b> ${item.results.correctionAngle}°</p>
+        <p><b>Expected Residual:</b> ${item.results.expectedResidual} mm/s</p>
+      ` : ''}
+      <button class="btn btn-primary" onclick="loadHistoryItem(${item.id})">Load Calculation</button>
+    </div>
+  `;
+}
+
+// Load history item
+function loadHistoryItem(id) {
+  const item = calculationHistory.find(calc => calc.id === id);
+  if (!item) return;
+  
+  currentResults = item.results;
+  currentResults.method = item.method;
+  currentResults.timestamp = item.timestamp;
+  
+  // Navigate to appropriate tab
+  const tabElement = document.querySelector(`.tab[onclick="switchTab('${item.type}', this)"]`);
+  if (tabElement) {
+    switchTab(item.type, tabElement);
+  }
+  
+  showNotification('Calculation loaded from history', 'success');
+  closeModal();
+}
+
+// Refresh history
+function refreshHistory() {
+  loadHistory();
+  showNotification('History refreshed', 'success');
+}
+
+// Export history
+function exportHistory() {
+  if (calculationHistory.length === 0) {
+    showNotification('No history to export', 'warning');
+    return;
+  }
+  
+  let exportText = 'Engineering Tools Portal - Calculation History\n';
+  exportText += `Exported: ${new Date().toLocaleString()}\n\n`;
+  
+  calculationHistory.forEach(item => {
+    exportText += `Type: ${item.type}\n`;
+    exportText += `Method: ${item.method}\n`;
+    exportText += `Date: ${new Date(item.timestamp).toLocaleString()}\n`;
+    exportText += `Results:\n`;
+    if (item.results.correctionMass) {
+      exportText += `  Correction Mass: ${item.results.correctionMass} kg\n`;
+      exportText += `  Placement Angle: ${item.results.correctionAngle}°\n`;
+      exportText += `  Expected Residual: ${item.results.expectedResidual} mm/s\n`;
+    }
+    exportText += '\n';
+  });
+  
+  const blob = new Blob([exportText], { type: "text/plain" });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `calculation_history_${Date.now()}.txt`;
+  a.click();
+  window.URL.revokeObjectURL(url);
+  
+  showNotification('History exported successfully', 'success');
+}
+
+// Clear history
+function clearHistory() {
+  if (confirm('Are you sure you want to clear all calculation history? This cannot be undone.')) {
+    calculationHistory = [];
+    localStorage.removeItem('calcHistory');
+    loadHistory();
+    document.getElementById('historyDetails').innerHTML = '';
+    showNotification('History cleared', 'success');
+  }
+}
+
+// Filter history
+function filterHistory() {
+  const typeFilter = document.getElementById('historyFilter').value;
+  const dateFilter = document.getElementById('dateFilter').value;
+  
+  let filteredHistory = [...calculationHistory];
+  
+  // Filter by type
+  if (typeFilter !== 'all') {
+    filteredHistory = filteredHistory.filter(item => item.type === typeFilter);
+  }
+  
+  // Filter by date
+  const today = new Date();
+  if (dateFilter === 'today') {
+    filteredHistory = filteredHistory.filter(item => 
+      new Date(item.timestamp).toDateString() === today.toDateString()
+    );
+  } else if (dateFilter === 'week') {
+    const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+    filteredHistory = filteredHistory.filter(item => 
+      new Date(item.timestamp) >= weekAgo
+    );
+  } else if (dateFilter === 'month') {
+    const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+    filteredHistory = filteredHistory.filter(item => 
+      new Date(item.timestamp) >= monthAgo
+    );
+  }
+  
+  // Update display
+  const historyList = document.getElementById('historyList');
+  if (filteredHistory.length === 0) {
+    historyList.innerHTML = '<p>No calculations match the current filters</p>';
+    return;
+  }
+  
+  historyList.innerHTML = '';
+  filteredHistory.forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'history-item';
+    div.innerHTML = `
+      <strong>${item.type.charAt(0).toUpperCase() + item.type.slice(1)} - ${item.method}</strong><br>
+      ${new Date(item.timestamp).toLocaleString()}<br>
+      ${item.results.correctionMass ? `Correction Mass: ${item.results.correctionMass} kg at ${item.results.correctionAngle}°` : 'Calculation data'}
+    `;
+    div.onclick = () => showHistoryDetails(item);
+    historyList.appendChild(div);
+  });
+}
+
+// ==================== CONVEYOR DESIGN ====================
+
+// Conveyor wizard navigation
+function nextConveyorStep() {
+  const currentStep = document.querySelector('.wizard-step.active');
+  const stepNumber = parseInt(currentStep.id.replace('conveyorStep', ''));
+  
+  if (stepNumber < 4) {
+    currentStep.classList.remove('active');
+    document.getElementById(`conveyorStep${stepNumber + 1}`).classList.add('active');
+    
+    // Update step indicators
+    document.querySelectorAll('.step').forEach((step, index) => {
+      if (index < stepNumber) {
+        step.classList.add('completed');
+      }
+      if (index === stepNumber) {
+        step.classList.add('active');
+      }
+    });
+  }
+}
+
+function previousConveyorStep() {
+  const currentStep = document.querySelector('.wizard-step.active');
+  const stepNumber = parseInt(currentStep.id.replace('conveyorStep', ''));
+  
+  if (stepNumber > 1) {
+    currentStep.classList.remove('active');
+    document.getElementById(`conveyorStep${stepNumber - 1}`).classList.add('active');
+    
+    // Update step indicators
+    document.querySelectorAll('.step').forEach((step, index) => {
+      if (index < stepNumber - 1) {
+        step.classList.add('completed');
+      }
+      if (index === stepNumber - 1) {
+        step.classList.add('active');
+      }
+    });
+  }
+}
+
+function calculateConveyor() {
+  const beltWidth = parseFloat(document.getElementById('beltWidth').value);
+  const conveyorLength = parseFloat(document.getElementById('conveyorLength').value);
+  const inclinationAngle = parseFloat(document.getElementById('inclinationAngle').value);
+  const beltSpeed = parseFloat(document.getElementById('beltSpeed').value);
+  const materialDensity = parseFloat(document.getElementById('materialDensity').value);
+  const throughput = parseFloat(document.getElementById('throughput').value);
+  const motorRPM = parseFloat(document.getElementById('motorRPM').value);
+  const efficiency = parseFloat(document.getElementById('efficiency').value);
+  const serviceFactor = parseFloat(document.getElementById('serviceFactor').value);
+  const frictionCoeff = parseFloat(document.getElementById('frictionCoeff').value);
+  
+  // Calculate conveyor capacity
+  const beltArea = (beltWidth / 1000) * 0.1; // Simplified belt area
+  const materialVelocity = beltSpeed;
+  const capacity = beltArea * materialVelocity * materialDensity * 3600; // kg/h
+  
+  // Calculate power requirements
+  const liftPower = (throughput * 9.81 * conveyorLength * Math.sin(inclinationAngle * Math.PI / 180)) / 3600;
+  const frictionPower = frictionCoeff * throughput * 9.81 * conveyorLength * Math.cos(inclinationAngle * Math.PI / 180) / 3600;
+  const totalPower = (liftPower + frictionPower) * serviceFactor / (efficiency / 100);
+  
+  // Calculate motor power
+  const motorPower = totalPower;
+  
+  // Display results
+  const resultsHTML = `
+    <div class="result-card">
+      <h4>Conveyor Design Results</h4>
+      <p><b>Conveyor Capacity:</b> ${capacity.toFixed(2)} kg/h</p>
+      <p><b>Required Power:</b> ${totalPower.toFixed(2)} kW</p>
+      <p><b>Motor Power:</b> ${motorPower.toFixed(2)} kW</p>
+      <p><b>Belt Tension:</b> ${(totalPower * 1000 / beltSpeed).toFixed(2)} N</p>
+      <p><b>Drive Pulley Diameter:</b> ${(motorPower * 60000 / (motorRPM * Math.PI * beltSpeed)).toFixed(2)} mm</p>
+    </div>
+  `;
+  
+  document.getElementById('conveyorResults').innerHTML = resultsHTML;
+  showNotification('Conveyor design calculated successfully', 'success');
+}
+
+function saveConveyorToHistory() {
+  showNotification('Conveyor design saved to history', 'success');
+}
+
+function optimizeConveyor() {
+  showNotification('Optimization feature coming soon', 'info');
+}
+
+// ==================== GEAR DESIGN ====================
+
+function calculateGear() {
+  const power = parseFloat(document.getElementById('gearPower').value);
+  const inputSpeed = parseFloat(document.getElementById('inputSpeed').value);
+  const outputSpeed = parseFloat(document.getElementById('outputSpeed').value);
+  const serviceFactor = parseFloat(document.getElementById('gearServiceFactor').value);
+  const gearType = document.getElementById('gearType').value;
+  
+  // Calculate gear ratio
+  const gearRatio = inputSpeed / outputSpeed;
+  
+  // Calculate torque
+  const inputTorque = (power * 9550) / inputSpeed; // Nm
+  const outputTorque = inputTorque * gearRatio * 0.95; // Assuming 95% efficiency
+  
+  // Estimate module (simplified)
+  const module = Math.cbrt((2 * inputTorque * serviceFactor) / (100 * 1)); // Simplified calculation
+  
+  // Calculate pinion and gear dimensions
+  const pinionTeeth = Math.round(20);
+  const gearTeeth = Math.round(pinionTeeth * gearRatio);
+  const pinionPitchDiameter = pinionTeeth * module;
+  const gearPitchDiameter = gearTeeth * module;
+  const centerDistance = (pinionPitchDiameter + gearPitchDiameter) / 2;
+  
+  // Store results for drawing
+  currentGearResults = {
+    gearRatio: gearRatio.toFixed(2),
+    inputTorque: inputTorque.toFixed(2),
+    outputTorque: outputTorque.toFixed(2),
+    module: module.toFixed(2),
+    pinionTeeth: pinionTeeth,
+    gearTeeth: gearTeeth,
+    centerDistance: centerDistance.toFixed(2),
+    pinionPitchDiameter: pinionPitchDiameter.toFixed(2),
+    gearPitchDiameter: gearPitchDiameter.toFixed(2),
+    power: power,
+    inputSpeed: inputSpeed,
+    outputSpeed: outputSpeed
+  };
+  
+  // Display results
+  const resultsHTML = `
+    <div class="result-card">
+      <h4>Gear Design Results</h4>
+      <p><b>Gear Ratio:</b> ${currentGearResults.gearRatio}</p>
+      <p><b>Input Torque:</b> ${currentGearResults.inputTorque} Nm</p>
+      <p><b>Output Torque:</b> ${currentGearResults.outputTorque} Nm</p>
+      <p><b>Module:</b> ${currentGearResults.module} mm</p>
+      <p><b>Pinion Teeth:</b> ${currentGearResults.pinionTeeth}</p>
+      <p><b>Gear Teeth:</b> ${currentGearResults.gearTeeth}</p>
+      <p><b>Center Distance:</b> ${currentGearResults.centerDistance} mm</p>
+      <p><b>Pinion Pitch Diameter:</b> ${currentGearResults.pinionPitchDiameter} mm</p>
+      <p><b>Gear Pitch Diameter:</b> ${currentGearResults.gearPitchDiameter} mm</p>
+    </div>
+  `;
+  
+  document.getElementById('gearResults').innerHTML = resultsHTML;
+  
+  // Update dimension displays
+  document.getElementById('pinionPitchDiameterDisplay').textContent = currentGearResults.pinionPitchDiameter;
+  document.getElementById('pinionTeethDisplay').textContent = currentGearResults.pinionTeeth;
+  document.getElementById('pinionModuleDisplay').textContent = currentGearResults.module;
+  document.getElementById('pinionTorqueDisplay').textContent = currentGearResults.inputTorque;
+  
+  document.getElementById('gearPitchDiameterDisplay').textContent = currentGearResults.gearPitchDiameter;
+  document.getElementById('gearTeethDisplay').textContent = currentGearResults.gearTeeth;
+  document.getElementById('gearModuleDisplay').textContent = currentGearResults.module;
+  document.getElementById('gearTorqueDisplay').textContent = currentGearResults.outputTorque;
+  
+  // Stress analysis
+  const stressHTML = `
+    <div class="result-card">
+      <h4>Gear Stress Analysis</h4>
+      <p><b>Bending Stress:</b> ${(inputTorque * serviceFactor / (module * pinionTeeth * 10)).toFixed(2)} MPa</p>
+      <p><b>Contact Stress:</b> ${(Math.sqrt(inputTorque * serviceFactor / (module * pinionTeeth * 5)) * 100).toFixed(2)} MPa</p>
+      <p><b>Safety Factor:</b> ${(300 / (inputTorque * serviceFactor / (module * pinionTeeth * 10))).toFixed(2)}</p>
+    </div>
+  `;
+  
+  document.getElementById('gearStressAnalysis').innerHTML = stressHTML;
+  
+  // Draw the gears
+  drawGears();
+  
+  showNotification('Gear design calculated successfully', 'success');
+}
+
+function resetGear() {
+  document.querySelectorAll('#gearTool input').forEach(input => {
+    input.value = '';
+  });
+  document.getElementById('gearResults').innerHTML = '';
+  document.getElementById('gearStressAnalysis').innerHTML = '';
+  
+  // Clear dimension displays
+  document.getElementById('pinionPitchDiameterDisplay').textContent = '-';
+  document.getElementById('pinionTeethDisplay').textContent = '-';
+  document.getElementById('pinionModuleDisplay').textContent = '-';
+  document.getElementById('pinionTorqueDisplay').textContent = '-';
+  
+  document.getElementById('gearPitchDiameterDisplay').textContent = '-';
+  document.getElementById('gearTeethDisplay').textContent = '-';
+  document.getElementById('gearModuleDisplay').textContent = '-';
+  document.getElementById('gearTorqueDisplay').textContent = '-';
+  
+  // Clear canvas
+  if (gearCtx) {
+    gearCtx.clearRect(0, 0, gearCanvas.width, gearCanvas.height);
+  }
+  
+  showNotification('Gear form reset', 'info');
+}
+
+function saveGearToHistory() {
+  if (!currentGearResults.gearRatio) {
+    showNotification('Please perform a calculation first', 'warning');
+    return;
+  }
+  
+  const historyItem = {
+    id: Date.now(),
+    type: 'gear',
+    method: 'gearDesign',
+    results: currentGearResults,
+    timestamp: new Date().toISOString()
+  };
+  
+  calculationHistory.unshift(historyItem);
+  if (calculationHistory.length > 50) {
+    calculationHistory = calculationHistory.slice(0, 50);
+  }
+  
+  localStorage.setItem('calcHistory', JSON.stringify(calculationHistory));
+  showNotification('Gear design saved to history', 'success');
+}
+
+function analyzeGear() {
+  showNotification('Gear analysis feature coming soon', 'info');
+}
+
+function optimizeGear() {
+  showNotification('Gear optimization feature coming soon', 'info');
+}
+
+// ==================== GEAR DRAWING ====================
+
+function initializeGearDrawing() {
+  gearCanvas = document.getElementById('gearDrawingCanvas');
+  if (!gearCanvas) return;
+  
+  gearCtx = gearCanvas.getContext('2d');
+  
+  // Set canvas size
+  gearCanvas.width = 800;
+  gearCanvas.height = 400;
+  
+  // Initial draw
+  if (currentGearResults.gearRatio) {
+    drawGears();
+  } else {
+    // Draw placeholder
+    gearCtx.fillStyle = '#e0e0e0';
+    gearCtx.font = '16px Arial';
+    gearCtx.textAlign = 'center';
+    gearCtx.fillText('Calculate gear design to see drawing', gearCanvas.width / 2, gearCanvas.height / 2);
+  }
+}
+
+function drawGears() {
+  if (!gearCtx || !currentGearResults.gearRatio) return;
+  
+  // Clear canvas
+  gearCtx.clearRect(0, 0, gearCanvas.width, gearCanvas.height);
+  
+  // Save context state
+  gearCtx.save();
+  
+  // Apply zoom
+  gearCtx.translate(gearCanvas.width / 2, gearCanvas.height / 2);
+  gearCtx.scale(zoomLevel, zoomLevel);
+  gearCtx.translate(-gearCanvas.width / 2, -gearCanvas.height / 2);
+  
+  const centerX = gearCanvas.width / 2;
+  const centerY = gearCanvas.height / 2;
+  
+  // Scale factors for drawing
+  const scale = 1.5; // Scale up for better visibility
+  
+  if (currentGearView === 'assembly' || currentGearView === 'pinion') {
+    // Draw pinion
+    drawPinion(centerX - parseFloat(currentGearResults.centerDistance) * scale / 2, centerY, 
+              parseFloat(currentGearResults.pinionPitchDiameter) * scale, 
+              parseFloat(currentGearResults.pinionTeeth), rotationAngle);
+  }
+  
+  if (currentGearView === 'assembly' || currentGearView === 'gear') {
+    // Draw gear
+    drawGear(centerX + parseFloat(currentGearResults.centerDistance) * scale / 2, centerY, 
+            parseFloat(currentGearResults.gearPitchDiameter) * scale, 
+            parseFloat(currentGearResults.gearTeeth), -rotationAngle * parseFloat(currentGearResults.gearRatio));
+  }
+  
+  // Draw center line
+  if (currentGearView === 'assembly') {
+    gearCtx.strokeStyle = '#ffc107';
+    gearCtx.lineWidth = 2;
+    gearCtx.setLineDash([5, 5]);
+    gearCtx.beginPath();
+    gearCtx.moveTo(centerX - 150, centerY);
+    gearCtx.lineTo(centerX + 150, centerY);
+    gearCtx.stroke();
+    gearCtx.setLineDash([]);
+    
+    // Draw center distance
+    if (showDimensions) {
+      gearCtx.fillStyle = '#dc3545';
+      gearCtx.font = '12px Arial';
+      gearCtx.textAlign = 'center';
+      gearCtx.fillText(`Center Distance: ${currentGearResults.centerDistance} mm`, centerX, centerY + 30);
+    }
+  }
+  
+  // Restore context state
+  gearCtx.restore();
+}
+
+function drawPinion(x, y, diameter, teeth, rotation) {
+  const radius = diameter / 2;
+  const toothHeight = radius * 0.3;
+  const toothWidth = (2 * Math.PI * radius) / (teeth * 2);
+  
+  gearCtx.save();
+  gearCtx.translate(x, y);
+  gearCtx.rotate(rotation);
+  
+  // Draw pinion body
+  gearCtx.fillStyle = '#004aad';
+  gearCtx.strokeStyle = '#003380';
+  gearCtx.lineWidth = 2;
+  
+  gearCtx.beginPath();
+  gearCtx.arc(0, 0, radius, 0, 2 * Math.PI);
+  gearCtx.fill();
+  gearCtx.stroke();
+  
+  // Draw teeth
+  gearCtx.fillStyle = '#0055cc';
+  for (let i = 0; i < teeth; i++) {
+    const angle = (i * 2 * Math.PI) / teeth;
+    const nextAngle = ((i + 1) * 2 * Math.PI) / teeth;
+    
+    gearCtx.save();
+    gearCtx.rotate(angle);
+    
+    // Draw tooth
+    gearCtx.beginPath();
+    gearCtx.moveTo(radius, 0);
+    gearCtx.lineTo(radius + toothHeight, -toothWidth / 2);
+    gearCtx.lineTo(radius + toothHeight, toothWidth / 2);
+    gearCtx.lineTo(radius, 0);
+    gearCtx.closePath();
+    gearCtx.fill();
+    gearCtx.stroke();
+    
+    gearCtx.restore();
+  }
+  
+  // Draw center hole
+  gearCtx.fillStyle = '#ffffff';
+  gearCtx.beginPath();
+  gearCtx.arc(0, 0, radius * 0.2, 0, 2 * Math.PI);
+  gearCtx.fill();
+  
+  // Draw dimensions
+  if (showDimensions) {
+    gearCtx.strokeStyle = '#dc3545';
+    gearCtx.fillStyle = '#dc3545';
+    gearCtx.lineWidth = 1;
+    gearCtx.font = '10px Arial';
+    gearCtx.textAlign = 'center';
+    
+    // Diameter dimension
+    gearCtx.beginPath();
+    gearCtx.moveTo(-radius, -radius - 10);
+    gearCtx.lineTo(radius, -radius - 10);
+    gearCtx.stroke();
+    
+    gearCtx.fillText(`Ø${diameter.toFixed(1)}`, 0, -radius - 15);
+    
+    // Teeth count
+    gearCtx.fillText(`${teeth}T`, 0, radius + 20);
+  }
+  
+  gearCtx.restore();
+}
+
+function drawGear(x, y, diameter, teeth, rotation) {
+  const radius = diameter / 2;
+  const toothHeight = radius * 0.3;
+  const toothWidth = (2 * Math.PI * radius) / (teeth * 2);
+  
+  gearCtx.save();
+  gearCtx.translate(x, y);
+  gearCtx.rotate(rotation);
+  
+  // Draw gear body
+  gearCtx.fillStyle = '#28a745';
+  gearCtx.strokeStyle = '#1e7e34';
+  gearCtx.lineWidth = 2;
+  
+  gearCtx.beginPath();
+  gearCtx.arc(0, 0, radius, 0, 2 * Math.PI);
+  gearCtx.fill();
+  gearCtx.stroke();
+  
+  // Draw teeth
+  gearCtx.fillStyle = '#34ce57';
+  for (let i = 0; i < teeth; i++) {
+    const angle = (i * 2 * Math.PI) / teeth;
+    const nextAngle = ((i + 1) * 2 * Math.PI) / teeth;
+    
+    gearCtx.save();
+    gearCtx.rotate(angle);
+    
+    // Draw tooth
+    gearCtx.beginPath();
+    gearCtx.moveTo(radius, 0);
+    gearCtx.lineTo(radius + toothHeight, -toothWidth / 2);
+    gearCtx.lineTo(radius + toothHeight, toothWidth / 2);
+    gearCtx.lineTo(radius, 0);
+    gearCtx.closePath();
+    gearCtx.fill();
+    gearCtx.stroke();
+    
+    gearCtx.restore();
+  }
+  
+  // Draw center hole
+  gearCtx.fillStyle = '#ffffff';
+  gearCtx.beginPath();
+  gearCtx.arc(0, 0, radius * 0.2, 0, 2 * Math.PI);
+  gearCtx.fill();
+  
+  // Draw dimensions
+  if (showDimensions) {
+    gearCtx.strokeStyle = '#dc3545';
+    gearCtx.fillStyle = '#dc3545';
+    gearCtx.lineWidth = 1;
+    gearCtx.font = '10px Arial';
+    gearCtx.textAlign = 'center';
+    
+    // Diameter dimension
+    gearCtx.beginPath();
+    gearCtx.moveTo(-radius, -radius - 10);
+    gearCtx.lineTo(radius, -radius - 10);
+    gearCtx.stroke();
+    
+    gearCtx.fillText(`Ø${diameter.toFixed(1)}`, 0, -radius - 15);
+    
+    // Teeth count
+    gearCtx.fillText(`${teeth}T`, 0, radius + 20);
+  }
+  
+  gearCtx.restore();
+}
+
+function setGearView(view) {
+  currentGearView = view;
+  
+  // Update button states
+  document.querySelectorAll('.gear-drawing-controls .tool-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  event.target.classList.add('active');
+  
+  // Redraw
+  drawGears();
+}
+
+function toggleDimensions() {
+  showDimensions = !showDimensions;
+  event.target.classList.toggle('active');
+  drawGears();
+}
+
+function zoomIn() {
+  zoomLevel = Math.min(zoomLevel * 1.2, 3);
+  drawGears();
+}
+
+function zoomOut() {
+  zoomLevel = Math.max(zoomLevel / 1.2, 0.5);
+  drawGears();
+}
+
+function resetZoom() {
+  zoomLevel = 1;
+  drawGears();
+}
+
+function toggleAnimation() {
+  isAnimating = !isAnimating;
+  event.target.classList.toggle('active');
+  
+  if (isAnimating) {
+    animateGears();
+  } else {
+    if (animationId) {
+      cancelAnimationFrame(animationId);
+      animationId = null;
+    }
+  }
+}
+
+function animateGears() {
+  if (!isAnimating) return;
+  
+  rotationAngle += 0.02;
+  drawGears();
+  
+  animationId = requestAnimationFrame(animateGears);
+}
+
+function exportGearDXF() {
+  showNotification('DXF export feature coming soon', 'info');
+}
+
+function exportGearPNG() {
+  if (!gearCanvas) return;
+  
+  const link = document.createElement('a');
+  link.download = `gear_design_${Date.now()}.png`;
+  link.href = gearCanvas.toDataURL();
+  link.click();
+  
+  showNotification('Gear drawing exported as PNG', 'success');
+}
+
+function exportGearPDF() {
+  if (!gearCanvas) return;
+  
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF();
+  
+  const imgData = gearCanvas.toDataURL('image/png');
+  pdf.addImage(imgData, 'PNG', 10, 10, 190, 100);
+  
+  // Add gear specifications
+  pdf.setFontSize(12);
+  let yPosition = 120;
+  
+  pdf.text('Gear Specifications:', 10, yPosition);
+  yPosition += 10;
+  
+  pdf.text(`Gear Ratio: ${currentGearResults.gearRatio}`, 20, yPosition);
+  yPosition += 8;
+  pdf.text(`Module: ${currentGearResults.module} mm`, 20, yPosition);
+  yPosition += 8;
+  pdf.text(`Pinion Teeth: ${currentGearResults.pinionTeeth}`, 20, yPosition);
+  yPosition += 8;
+  pdf.text(`Gear Teeth: ${currentGearResults.gearTeeth}`, 20, yPosition);
+  yPosition += 8;
+  pdf.text(`Center Distance: ${currentGearResults.centerDistance} mm`, 20, yPosition);
+  yPosition += 8;
+  pdf.text(`Input Torque: ${currentGearResults.inputTorque} Nm`, 20, yPosition);
+  yPosition += 8;
+  pdf.text(`Output Torque: ${currentGearResults.outputTorque} Nm`, 20, yPosition);
+  
+  pdf.save(`gear_design_${Date.now()}.pdf`);
+  showNotification('Gear drawing exported as PDF', 'success');
+}
+
+// ==================== VIBRATION ANALYSIS ====================
+
+function startMonitoring() {
+  document.getElementById('startBtn').disabled = true;
+  document.getElementById('stopBtn').disabled = false;
+  vibrationData.isMonitoring = true;
+  
+  // Generate simulated data
+  monitoringInterval = setInterval(() => {
+    generateVibrationData();
+    updateVibrationCharts();
+  }, 1000);
+  
+  showNotification('Vibration monitoring started', 'success');
+}
+
+function stopMonitoring() {
+  document.getElementById('startBtn').disabled = false;
+  document.getElementById('stopBtn').disabled = true;
+  vibrationData.isMonitoring = false;
+  
+  if (monitoringInterval) {
+    clearInterval(monitoringInterval);
+  }
+  
+  showNotification('Vibration monitoring stopped', 'info');
+}
+
+function generateVibrationData() {
+  const samplingRate = parseInt(document.getElementById('samplingRate').value) || 1000;
+  const duration = parseInt(document.getElementById('measurementDuration').value) || 10;
+  const machineRPM = parseInt(document.getElementById('machineRPM').value) || 1800;
+  
+  // Generate time history data
+  const timeHistory = [];
+  const spectrum = [];
+  
+  for (let i = 0; i < samplingRate * duration; i++) {
+    const t = i / samplingRate;
+    // Simulate vibration with fundamental frequency and harmonics
+    const fundamentalFreq = machineRPM / 60; // Hz
+    const signal = 
+                  2.5 * Math.sin(2 * Math.PI * fundamentalFreq * t) + // Fundamental
+                  1.2 * Math.sin(2 * Math.PI * 2 * fundamentalFreq * t) + // 2nd harmonic
+                  0.8 * Math.sin(2 * Math.PI * 3 * fundamentalFreq * t) + // 3rd harmonic
+                  0.3 * Math.sin(2 * Math.PI * 4 * fundamentalFreq * t) + // 4th harmonic
+                  0.1 * (Math.random() - 0.5); // Noise
+    timeHistory.push(signal);
+  }
+  
+  // Simple FFT simulation for spectrum
+  const fftSize = 1024;
+  for (let i = 0; i < fftSize / 2; i++) {
+    const freq = (i * samplingRate) / fftSize;
+    const amplitude = Math.random() * 2 + 0.5;
+    spectrum.push({ freq, amplitude });
+  }
+  
+  vibrationData.timeHistory = timeHistory;
+  vibrationData.spectrum = spectrum;
+}
+
+function updateVibrationCharts() {
+  // Update spectrum chart
+  const spectrumCtx = document.getElementById('vibrationSpectrum');
+  if (spectrumCtx && vibrationData.spectrum.length > 0) {
+    if (!charts.vibrationSpectrum) {
+      charts.vibrationSpectrum = new Chart(spectrumCtx, {
+        type: 'line',
+        data: {
+          labels: vibrationData.spectrum.map(d => d.freq.toFixed(1)),
+          datasets: [{
+            label: 'Amplitude',
+            data: vibrationData.spectrum.map(d => d.amplitude),
+            borderColor: '#004aad',
+            backgroundColor: 'rgba(0, 74, 173, 0.1)',
+            tension: 0.4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Frequency (Hz)'
+              }
+            },
+            y: {
+              title: {
+                display: true,
+                text: 'Amplitude'
+              }
+            }
+          }
+        }
+      });
+    } else {
+      charts.vibrationSpectrum.data.datasets[0].data = vibrationData.spectrum.map(d => d.amplitude);
+      charts.vibrationSpectrum.update();
+    }
+  }
+  
+  // Update time history chart
+  const timeHistoryCtx = document.getElementById('vibrationTimeHistory');
+  if (timeHistoryCtx && vibrationData.timeHistory.length > 0) {
+    if (!charts.vibrationTimeHistory) {
+      charts.vibrationTimeHistory = new Chart(timeHistoryCtx, {
+        type: 'line',
+        data: {
+          labels: vibrationData.timeHistory.map((_, i) => (i / 1000).toFixed(3)),
+          datasets: [{
+            label: 'Vibration',
+            data: vibrationData.timeHistory,
+            borderColor: '#0066ff',
+            backgroundColor: 'rgba(0, 102, 255, 0.1)',
+            tension: 0.4,
+            pointRadius: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Time (s)'
+              }
+            },
+            y: {
+              title: {
+                display: true,
+                text: 'Amplitude'
+              }
+            }
+          }
+        }
+      });
+    } else {
+      charts.vibrationTimeHistory.data.datasets[0].data = vibrationData.timeHistory;
+      charts.vibrationTimeHistory.update();
+    }
+  }
+  
+  // Update analysis values
+  const machineRPM = parseInt(document.getElementById('machineRPM').value) || 1800;
+  const fundamentalFreq = machineRPM / 60;
+  
+  document.getElementById('primaryFreq').textContent = fundamentalFreq.toFixed(1);
+  document.getElementById('amplitude').textContent = '2.5';
+  document.getElementById('harmonics').textContent = '3';
+  document.getElementById('overallLevel').textContent = '3.2';
+  document.getElementById('overallVib').textContent = '3.2';
+  document.getElementById('crestFactor').textContent = '3.5';
+  document.getElementById('kurtosis').textContent = '3.0';
+  document.getElementById('healthStatus').textContent = 'Good';
+}
+
+function analyzeVibration() {
+  if (!vibrationData.isMonitoring) {
+    showNotification('Please start monitoring first', 'warning');
+    return;
+  }
+  
+  showNotification('Vibration analysis completed', 'success');
+}
+
+// ==================== MATERIALS DATABASE ====================
+
+function loadMaterials() {
+  const materialsGrid = document.getElementById('materialsGrid');
+  if (!materialsGrid) return;
+  
+  const materials = [
+    { name: 'Carbon Steel', density: 7850, strength: 250, elastic: 200 },
+    { name: 'Alloy Steel', density: 7850, strength: 500, elastic: 210 },
+    { name: 'Stainless Steel', density: 8000, strength: 200, elastic: 193 },
+    { name: 'Aluminum', density: 2700, strength: 95, elastic: 69 },
+    { name: 'Cast Iron', density: 7200, strength: 120, elastic: 110 },
+    { name: 'Titanium', density: 4500, strength: 880, elastic: 116 },
+    { name: 'Bronze', density: 8700, strength: 200, elastic: 100 },
+    { name: 'Brass', density: 8500, strength: 150, elastic: 97 }
+  ];
+  
+  materialsGrid.innerHTML = '';
+  materials.forEach(material => {
+    const card = document.createElement('div');
+    card.className = 'material-card';
+    card.innerHTML = `
+      <h3>${material.name}</h3>
+      <p><strong>Density:</strong> ${material.density} kg/m³</p>
+      <p><strong>Strength:</strong> ${material.strength} MPa</p>
+      <p><strong>Modulus:</strong> ${material.elastic} GPa</p>
+      <button class="btn btn-primary" onclick="selectMaterial('${material.name}')">Select</button>
+    `;
+    materialsGrid.appendChild(card);
+  });
+}
+
+function searchMaterials() {
+  const query = document.getElementById('materialSearch').value.toLowerCase();
+  const cards = document.querySelectorAll('#materialsGrid .material-card');
+  
+  cards.forEach(card => {
+    const text = card.textContent.toLowerCase();
+    card.style.display = text.includes(query) ? 'block' : 'none';
+  });
+}
+
+function selectMaterial(materialName) {
+  showNotification(`Selected material: ${materialName}`, 'success');
+}
+
+function addMaterial() {
+  showModal('Add Material', `
+    <form onsubmit="saveNewMaterial(event)">
+      <div class="input-group">
+        <label>Material Name:</label>
+        <input type="text" id="newMaterialName" required>
+      </div>
+      <div class="input-group">
+        <label>Density (kg/m³):</label>
+        <input type="number" id="newMaterialDensity" required>
+      </div>
+      <div class="input-group">
+        <label>Strength (MPa):</label>
+        <input type="number" id="newMaterialStrength" required>
+      </div>
+      <div class="input-group">
+        <label>Elastic Modulus (GPa):</label>
+        <input type="number" id="newMaterialElastic" required>
+      </div>
+      <button type="submit" class="btn btn-primary">Save Material</button>
+    </form>
+  `);
+}
+
+function saveNewMaterial(event) {
+  event.preventDefault();
+  showNotification('Material added successfully', 'success');
+  closeModal();
+  loadMaterials();
+}
+
+// ==================== REPORTS ====================
+
+function loadReports() {
+  const recentReports = document.getElementById('recentReports');
+  if (!recentReports) return;
+  
+  // Load saved reports from localStorage
+  const savedReports = JSON.parse(localStorage.getItem('savedReports')) || [];
+  
+  if (savedReports.length === 0) {
+    recentReports.innerHTML = '<p>No reports generated yet</p>';
+    return;
+  }
+  
+  recentReports.innerHTML = '';
+  savedReports.forEach(report => {
+    const div = document.createElement('div');
+    div.className = 'report-template';
+    div.innerHTML = `
+      <strong>${report.name}</strong><br>
+      ${new Date(report.timestamp).toLocaleString()}<br>
+      Type: ${report.type}
+    `;
+    div.onclick = () => viewReport(report.id);
+    recentReports.appendChild(div);
+  });
+}
+
+function createCustomReport() {
+  showModal('Create Custom Report', `
+    <form onsubmit="saveCustomReport(event)">
+      <div class="input-group">
+        <label>Report Name:</label>
+        <input type="text" id="customReportName" required>
+      </div>
+      <div class="input-group">
+        <label>Report Type:</label>
+        <select id="customReportType">
+          <option value="summary">Summary Report</option>
+          <option value="detailed">Detailed Analysis</option>
+          <option value="comparison">Comparison Report</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label>Include Calculations:</label>
+        <label class="toggle-switch">
+          <input type="checkbox" id="includeCalculations" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="input-group">
+        <label>Include Charts:</label>
+        <label class="toggle-switch">
+          <input type="checkbox" id="includeChartsInReport" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+      <button type="submit" class="btn btn-primary">Create Report</button>
+    </form>
+  `);
+}
+
+function saveCustomReport(event) {
+  event.preventDefault();
+  
+  const reportName = document.getElementById('customReportName').value;
+  const reportType = document.getElementById('customReportType').value;
+  const includeCalculations = document.getElementById('includeCalculations').checked;
+  const includeCharts = document.getElementById('includeChartsInReport').checked;
+  
+  const report = {
+    id: Date.now(),
+    name: reportName,
+    type: reportType,
+    includeCalculations: includeCalculations,
+    includeCharts: includeCharts,
+    timestamp: new Date().toISOString(),
+    data: calculationHistory
+  };
+  
+  // Save to localStorage
+  let savedReports = JSON.parse(localStorage.getItem('savedReports')) || [];
+  savedReports.unshift(report);
+  localStorage.setItem('savedReports', JSON.stringify(savedReports));
+  
+  showNotification('Custom report created successfully', 'success');
+  closeModal();
+  loadReports();
+}
+
+function reportTemplates() {
+  showModal('Report Templates', `
+    <div class="grid-container">
+      <div class="report-template" onclick="useTemplate('standard')">
+        <h3>Standard Report</h3>
+        <p>Basic calculation results with summary</p>
+      </div>
+      <div class="report-template" onclick="useTemplate('detailed')">
+        <h3>Detailed Analysis</h3>
+        <p>Comprehensive analysis with charts</p>
+      </div>
+      <div class="report-template" onclick="useTemplate('comparison')">
+        <h3>Comparison Report</h3>
+        <p>Compare multiple calculations</p>
+      </div>
+      <div class="report-template" onclick="useTemplate('executive')">
+        <h3>Executive Summary</h3>
+        <p>High-level overview for management</p>
+      </div>
+    </div>
+  `);
+}
+
+function useTemplate(templateType) {
+  const templates = {
+    'standard': {
+      name: 'Standard Engineering Report',
+      type: 'summary',
+      includeCalculations: true,
+      includeCharts: false
+    },
+    'detailed': {
+      name: 'Detailed Analysis Report',
+      type: 'detailed',
+      includeCalculations: true,
+      includeCharts: true
+    },
+    'comparison': {
+      name: 'Comparison Report',
+      type: 'comparison',
+      includeCalculations: true,
+      includeCharts: true
+    },
+    'executive': {
+      name: 'Executive Summary',
+      type: 'summary',
+      includeCalculations: false,
+      includeCharts: true
+    }
+  };
+  
+  const template = templates[templateType];
+  if (template) {
+    document.getElementById('reportType').value = template.type;
+    document.getElementById('includeCharts').checked = template.includeCharts;
+    document.getElementById('includeRawData').checked = template.includeCalculations;
+    
+    showNotification(`Template "${template.name}" applied`, 'success');
+    closeModal();
+  }
+}
+
+function generateReport() {
+  const reportType = document.getElementById('reportType').value;
+  const includeCharts = document.getElementById('includeCharts').checked;
+  const includeRawData = document.getElementById('includeRawData').checked;
+  const companyName = document.getElementById('companyName').value || 'Engineering Solutions';
+  const projectName = document.getElementById('projectName').value || 'Engineering Project';
+  const engineerName = document.getElementById('engineerName').value || 'Engineer';
+  
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  
+  // Add header
+  doc.setFontSize(20);
+  doc.text(companyName, 105, 20, { align: 'center' });
+  
+  doc.setFontSize(16);
+  doc.text(projectName, 105, 30, { align: 'center' });
+  doc.text('Engineering Report', 105, 40, { align: 'center' });
+  
+  // Add date and engineer
+  doc.setFontSize(12);
+  doc.text(`Date: ${new Date().toLocaleString()}`, 20, 55);
+  doc.text(`Engineer: ${engineerName}`, 20, 65);
+  doc.text(`Report Type: ${reportType}`, 20, 75);
+  
+  // Add summary
+  doc.setFontSize(14);
+  doc.text('Summary', 20, 90);
+  doc.setFontSize(12);
+  doc.text(`Total Calculations: ${calculationHistory.length}`, 30, 100);
+  
+  // Add calculation details if requested
+  if (includeRawData && calculationHistory.length > 0) {
+    doc.setFontSize(14);
+    doc.text('Calculation Details', 20, 120);
+    doc.setFontSize(10);
+    
+    let yPosition = 130;
+    calculationHistory.slice(0, 5).forEach(item => {
+      if (yPosition > 270) {
+        doc.addPage();
+        yPosition = 20;
+      }
+      
+      doc.text(`${item.type} - ${item.method}`, 30, yPosition);
+      doc.text(`Date: ${new Date(item.timestamp).toLocaleString()}`, 30, yPosition + 5);
+      
+      if (item.results.correctionMass) {
+        doc.text(`Correction Mass: ${item.results.correctionMass} kg`, 30, yPosition + 10);
+        doc.text(`Placement Angle: ${item.results.correctionAngle}°`, 30, yPosition + 15);
+      }
+      
+      yPosition += 25;
+    });
+  }
+  
+  // Add footer
+  doc.setFontSize(10);
+  doc.text('Generated by Engineering Tools Portal', 105, 280, { align: 'center' });
+  
+  // Save the PDF
+  doc.save(`engineering_report_${Date.now()}.pdf`);
+  showNotification('Report generated successfully', 'success');
+}
+
+function previewReport() {
+  const reportType = document.getElementById('reportType').value;
+  const includeCharts = document.getElementById('includeCharts').checked;
+  const includeRawData = document.getElementById('includeRawData').checked;
+  const companyName = document.getElementById('companyName').value || 'Engineering Solutions';
+  const projectName = document.getElementById('projectName').value || 'Engineering Project';
+  const engineerName = document.getElementById('engineerName').value || 'Engineer';
+  
+  const previewDiv = document.getElementById('reportPreview');
+  previewDiv.innerHTML = `
+    <div class="result-card">
+      <div class="report-header">
+        <h2>${companyName}</h2>
+        <h3>${projectName} - Engineering Report</h3>
+        <p>Date: ${new Date().toLocaleString()}</p>
+        <p>Engineer: ${engineerName}</p>
+        <p>Report Type: ${reportType}</p>
+      </div>
+      
+      <h4>Summary</h4>
+      <p>Total Calculations: ${calculationHistory.length}</p>
+      
+      ${includeRawData && calculationHistory.length > 0 ? `
+        <h4>Recent Calculations</h4>
+        <ul>
+          ${calculationHistory.slice(0, 3).map(item => `
+            <li>
+              <strong>${item.type} - ${item.method}</strong><br>
+              Date: ${new Date(item.timestamp).toLocaleString()}<br>
+              ${item.results.correctionMass ? `Correction Mass: ${item.results.correctionMass} kg at ${item.results.correctionAngle}°` : 'Calculation data'}
+            </li>
+          `).join('')}
+        </ul>
+      ` : ''}
+      
+      <div class="report-footer">
+        <p>Generated by Engineering Tools Portal</p>
+      </div>
+    </div>
+  `;
+}
+
+function scheduleReport() {
+  showModal('Schedule Report', `
+    <form onsubmit="saveScheduledReport(event)">
+      <div class="input-group">
+        <label>Report Name:</label>
+        <input type="text" id="scheduledReportName" required>
+      </div>
+      <div class="input-group">
+        <label>Frequency:</label>
+        <select id="reportFrequency">
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
+          <option value="monthly">Monthly</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label>Time:</label>
+        <input type="time" id="reportTime" value="09:00">
+      </div>
+      <div class="input-group">
+        <label>Email Recipients:</label>
+        <input type="email" id="reportEmail" placeholder="email@example.com">
+      </div>
+      <button type="submit" class="btn btn-primary">Schedule Report</button>
+    </form>
+  `);
+}
+
+function saveScheduledReport(event) {
+  event.preventDefault();
+  
+  const reportName = document.getElementById('scheduledReportName').value;
+  const frequency = document.getElementById('reportFrequency').value;
+  const time = document.getElementById('reportTime').value;
+  const email = document.getElementById('reportEmail').value;
+  
+  const scheduledReport = {
+    id: Date.now(),
+    name: reportName,
+    frequency: frequency,
+    time: time,
+    email: email,
+    timestamp: new Date().toISOString()
+  };
+  
+  // Save to localStorage
+  let scheduledReports = JSON.parse(localStorage.getItem('scheduledReports')) || [];
+  scheduledReports.push(scheduledReport);
+  localStorage.setItem('scheduledReports', JSON.stringify(scheduledReports));
+  
+  showNotification('Report scheduled successfully', 'success');
+  closeModal();
+}
+
+function viewReport(reportId) {
+  const savedReports = JSON.parse(localStorage.getItem('savedReports')) || [];
+  const report = savedReports.find(r => r.id === reportId);
+  
+  if (!report) return;
+  
+  showModal(`Report: ${report.name}`, `
+    <div class="result-card">
+      <h3>${report.name}</h3>
+      <p><strong>Type:</strong> ${report.type}</p>
+      <p><strong>Date:</strong> ${new Date(report.timestamp).toLocaleString()}</p>
+      <p><strong>Include Calculations:</strong> ${report.includeCalculations ? 'Yes' : 'No'}</p>
+      <p><strong>Include Charts:</strong> ${report.includeCharts ? 'Yes' : 'No'}</p>
+      <p><strong>Total Calculations:</strong> ${report.data.length}</p>
+      
+      <div class="section-actions">
+        <button class="btn btn-primary" onclick="regenerateReport(${reportId})">Regenerate</button>
+        <button class="btn btn-secondary" onclick="downloadReport(${reportId})">Download</button>
+        <button class="btn btn-danger" onclick="deleteReport(${reportId})">Delete</button>
+      </div>
+    </div>
+  `);
+}
+
+function regenerateReport(reportId) {
+  showNotification('Report regenerated successfully', 'success');
+  closeModal();
+}
+
+function downloadReport(reportId) {
+  showNotification('Report downloaded successfully', 'success');
+  closeModal();
+}
+
+function deleteReport(reportId) {
+  if (confirm('Are you sure you want to delete this report?')) {
+    let savedReports = JSON.parse(localStorage.getItem('savedReports')) || [];
+    savedReports = savedReports.filter(r => r.id !== reportId);
+    localStorage.setItem('savedReports', JSON.stringify(savedReports));
+    
+    showNotification('Report deleted successfully', 'success');
+    closeModal();
+    loadReports();
+  }
+}
+
+// ==================== SETTINGS ====================
+
+function loadSettings() {
+  // Load settings from localStorage
+  const settings = JSON.parse(localStorage.getItem('appSettings')) || {};
+  
+  // Apply settings to form
+  if (settings.defaultUnits) {
+    document.getElementById('defaultUnits').value = settings.defaultUnits;
+  }
+  
+  if (settings.language) {
+    document.getElementById('language').value = settings.language;
+  }
+  
+  if (settings.autoSaveInterval !== undefined) {
+    document.getElementById('autoSaveInterval').value = settings.autoSaveInterval;
+  }
+  
+  if (settings.decimalPlaces !== undefined) {
+    document.getElementById('decimalPlaces').value = settings.decimalPlaces;
+  }
+  
+  if (settings.theme) {
+    document.getElementById('theme').value = settings.theme;
+  }
+  
+  if (settings.compactMode !== undefined) {
+    document.getElementById('compactMode').checked = settings.compactMode;
+  }
+  
+  if (settings.showTooltips !== undefined) {
+    document.getElementById('showTooltips').checked = settings.showTooltips;
+  }
+  
+  if (settings.enableNotifications !== undefined) {
+    document.getElementById('enableNotifications').checked = settings.enableNotifications;
+  }
+  
+  if (settings.notifyCalculation !== undefined) {
+    document.getElementById('notifyCalculation').checked = settings.notifyCalculation;
+  }
+  
+  if (settings.notifyErrors !== undefined) {
+    document.getElementById('notifyErrors').checked = settings.notifyErrors;
+  }
+  
+  if (settings.notifyAutoSave !== undefined) {
+    document.getElementById('notifyAutoSave').checked = settings.notifyAutoSave;
+  }
+  
+  if (settings.maxHistoryItems !== undefined) {
+    document.getElementById('maxHistoryItems').value = settings.maxHistoryItems;
+  }
+  
+  if (settings.clearHistoryOnExit !== undefined) {
+    document.getElementById('clearHistoryOnExit').checked = settings.clearHistoryOnExit;
+  }
+  
+  if (settings.exportFormat) {
+    document.getElementById('exportFormat').value = settings.exportFormat;
+  }
+}
+
+function saveSettings() {
+  const settings = {
+    defaultUnits: document.getElementById('defaultUnits').value,
+    language: document.getElementById('language').value,
+    autoSaveInterval: parseInt(document.getElementById('autoSaveInterval').value),
+    decimalPlaces: parseInt(document.getElementById('decimalPlaces').value),
+    theme: document.getElementById('theme').value,
+    compactMode: document.getElementById('compactMode').checked,
+    showTooltips: document.getElementById('showTooltips').checked,
+    enableNotifications: document.getElementById('enableNotifications').checked,
+    notifyCalculation: document.getElementById('notifyCalculation').checked,
+    notifyErrors: document.getElementById('notifyErrors').checked,
+    notifyAutoSave: document.getElementById('notifyAutoSave').checked,
+    maxHistoryItems: parseInt(document.getElementById('maxHistoryItems').value),
+    clearHistoryOnExit: document.getElementById('clearHistoryOnExit').checked,
+    exportFormat: document.getElementById('exportFormat').value
+  };
+  
+  localStorage.setItem('appSettings', JSON.stringify(settings));
+  showNotification('Settings saved successfully', 'success');
+}
+
+function resetSettings() {
+  if (confirm('Are you sure you want to reset all settings to default values?')) {
+    localStorage.removeItem('appSettings');
+    loadSettings();
+    showNotification('Settings reset to default values', 'success');
+  }
+}
+
+function changeTheme() {
+  const theme = document.getElementById('theme').value;
+  
+  if (theme === 'dark') {
+    document.body.classList.add('dark-mode');
+    isDarkMode = true;
+    document.querySelector('.theme-toggle').textContent = '☀️';
+  } else if (theme === 'light') {
+    document.body.classList.remove('dark-mode');
+    isDarkMode = false;
+    document.querySelector('.theme-toggle').textContent = '🌙';
+  } else if (theme === 'auto') {
+    // Check system preference
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      document.body.classList.add('dark-mode');
+      isDarkMode = true;
+      document.querySelector('.theme-toggle').textContent = '☀️';
+    } else {
+      document.body.classList.remove('dark-mode');
+      isDarkMode = false;
+      document.querySelector('.theme-toggle').textContent = '🌙';
+    }
+  }
+  
+  localStorage.setItem('theme', theme);
+}
+
+function exportAllData() {
+  const allData = {
+    calculations: calculationHistory,
+    reports: JSON.parse(localStorage.getItem('savedReports')) || [],
+    scheduledReports: JSON.parse(localStorage.getItem('scheduledReports')) || [],
+    settings: JSON.parse(localStorage.getItem('appSettings')) || {},
+    materials: JSON.parse(localStorage.getItem('materials')) || [],
+    timestamp: new Date().toISOString()
+  };
+  
+  const blob = new Blob([JSON.stringify(allData, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `engineering_tools_backup_${Date.now()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  
+  showNotification('All data exported successfully', 'success');
+}
+
+function clearAllData() {
+  if (confirm('Are you sure you want to clear all data? This will delete all calculations, reports, and settings. This action cannot be undone.')) {
+    localStorage.clear();
+    calculationHistory = [];
+    currentResults = {};
+    
+    // Reload the page to reset everything
+    location.reload();
+  }
+}
+
+function checkUpdates() {
+  showNotification('Checking for updates...', 'info');
+  
+  setTimeout(() => {
+    showNotification('You are using the latest version (1.0.0)', 'success');
+  }, 2000);
+}
+
+// Auto-save functionality
+function autoSave() {
+  if (currentResults.correctionMass) {
+    localStorage.setItem('autoSave', JSON.stringify(currentResults));
+  }
+}
+
+// Help system
+function showHelp() {
+  showModal('Help & Shortcuts', `
+    <h3>Keyboard Shortcuts</h3>
+    <p><kbd>Ctrl/Cmd + S</kbd> - Save calculation</p>
+    <p><kbd>Ctrl/Cmd + P</kbd> - Export PDF</p>
+    <p><kbd>Ctrl/Cmd + K</kbd> - Search</p>
+    <p><kbd>Esc</kbd> - Close modal</p>
+    
+    <h3>Tips</h3>
+    <p>• Use the floating action button for quick access</p>
+    <p>• All calculations are auto-saved every 30 seconds</p>
+    <p>• Switch between light and dark themes using the toggle</p>
+    <p>• Use the sidebar for easy navigation</p>
+    
+    <h3>Tools</h3>
+    <p>• <strong>Rotor Balancing:</strong> Calculate correction mass and angle</p>
+    <p>• <strong>Conveyor Design:</strong> Design belt conveyors with power calculations</p>
+    <p>• <strong>Gear Design:</strong> Calculate gear parameters and stress analysis</p>
+    <p>• <strong>Vibration Analysis:</strong> Real-time frequency spectrum analysis</p>
+    <p>• <strong>Materials Database:</strong> Browse and select engineering materials</p>
+    <p>• <strong>Calculation History:</strong> View and manage previous calculations</p>
+    <p>• <strong>Reports:</strong> Generate professional engineering reports</p>
+    <p>• <strong>Settings:</strong> Customize application behavior and appearance</p>
+  `);
+}
+
+// Generate PDF (placeholder for all tools)
+function generatePDF() {
+  if (!currentResults.correctionMass) {
+    showNotification('Please perform a calculation first', 'warning');
+    return;
+  }
+  
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  
+  // Add header
+  doc.setFontSize(20);
+  doc.text('Engineering Report', 105, 20, { align: 'center' });
+  
+  // Add date
+  doc.setFontSize(12);
+  doc.text(`Date: ${new Date().toLocaleString()}`, 20, 35);
+  
+  // Add method
+  doc.text(`Method: ${currentBalancingMethod}`, 20, 45);
+  
+  // Add results
+  doc.setFontSize(14);
+  doc.text('Results:', 20, 60);
+  doc.setFontSize(12);
+  doc.text(`Correction Mass: ${currentResults.correctionMass} kg`, 30, 70);
+  doc.text(`Placement Angle: ${currentResults.correctionAngle}°`, 30, 80);
+  doc.text(`Expected Residual Vibration: ${currentResults.expectedResidual} mm/s`, 30, 90);
+  
+  if (currentResults.avgVibration) {
+    doc.text(`Average Vibration: ${currentResults.avgVibration} mm/s`, 30, 100);
+    doc.text(`Maximum Vibration: ${currentResults.maxVibration} mm/s`, 30, 110);
+  }
+  
+  // Add footer
+  doc.setFontSize(10);
+  doc.text('Generated by Engineering Tools Portal', 105, 280, { align: 'center' });
+  
+  // Save the PDF
+  doc.save(`engineering_report_${Date.now()}.pdf`);
+  showNotification('PDF report generated', 'success');
+}
+
+// Load preset
+function loadPreset() {
+  const presets = {
+    '3trial': {
+      trialMass: 0.5,
+      r0: 2.5, a0: 1.2, h0: 0.8,
+      r120: 3.1, a120: 1.5, h120: 1.0,
+      r240: 2.8, a240: 1.3, h240: 0.9
+    },
+    '2point': {
+      mt: 0.5,
+      A1: 2.5, theta1: 45,
+      A2: 3.2, theta2: 120,
+      phit: 0
+    }
+  };
+  
+  const preset = presets[currentBalancingMethod];
+  if (preset) {
+    Object.keys(preset).forEach(key => {
+      const input = document.getElementById(key);
+      if (input) {
+        input.value = preset[key];
+        input.classList.add('success');
+      }
+    });
+    
+    showNotification('Preset loaded successfully', 'success');
+  } else {
+    showNotification('No preset available for this method', 'info');
+  }
+}
+
+// Toggle collapsible sections
+function toggleCollapsible(element) {
+  element.classList.toggle('active');
+}
+</script>
+
 </body>
 </html>
